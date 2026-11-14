@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Korboly Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0C0D0D">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="stylesheet" href="../css/ui.css">
+<style>
+body{min-height:100vh}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sb{border-right:1px solid var(--line);padding:28px 22px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:var(--paper)}
+.sb .logo{align-items:flex-start;margin-bottom:36px}
+.sb nav{display:flex;flex-direction:column;gap:2px}
+.sb nav button{display:flex;gap:12px;align-items:center;text-align:left;padding:12px 10px;color:var(--muted);transition:color .2s,background .2s,padding .3s var(--ease);border-left:1px solid transparent}
+.sb nav button:hover{color:var(--ink)}.sb nav button.on{color:var(--ink);border-left-color:var(--accent);background:var(--sheet);padding-left:16px}
+.sb nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.3;flex:none}
+.sb .bot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 clamp(16px,3vw,40px);height:72px;border-bottom:1px solid var(--line)}
+.top .who{text-align:right;font-size:13px;color:var(--muted)}.top .who b{display:block;color:var(--ink);font-weight:600}
+.mbtn{display:none}
+.cont{padding:clamp(20px,3vw,40px)}
+h1.serif{font-size:36px;margin:0 0 28px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+.stat{border:1px solid var(--line);background:var(--sheet);padding:20px}.stat .v{font-family:"Cormorant Garamond",serif;font-size:36px;line-height:1.1;margin-top:10px}
+.panel{border:1px solid var(--line);background:var(--sheet);padding:22px;margin-bottom:22px;overflow-x:auto}
+.panel h3{margin:0 0 16px}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:22px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:200px;border-bottom:1px solid #2a2d2d;padding-top:10px}
+.bars i{flex:1;background:linear-gradient(var(--accent),#4a4f4c);min-height:2px;transition:height .8s var(--ease);position:relative}
+.bars i:hover{background:var(--ink)}
+.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:8px}
+.bar-h{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.tools input,.tools select{background:var(--sheet);border:1px solid #2a2d2d;color:var(--ink);height:38px;padding:0 12px;font:inherit;font-size:14px;flex:1 1 170px;min-width:0;max-width:100%}
+.pimg{width:44px;height:56px;object-fit:cover;background:#161818;border:1px solid var(--line)}
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.sec{margin-bottom:34px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sb{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:70;transform:translateX(-100%);transition:transform .35s var(--ease)}.sb.on{transform:none}.mbtn{display:inline-flex}.grid2{grid-template-columns:1fr}}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.thumbs div{position:relative}.thumbs img{width:64px;height:80px;object-fit:cover;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--err);color:var(--paper);font-size:12px;line-height:20px}
+.denied{max-width:480px;margin:20vh auto;text-align:center;padding:0 24px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="modal" id="modal"><div class="box" id="mbox"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="grain"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js"></script><script src="../js/sb.js"></script>
+<script>
+(function(){
+var root=document.getElementById('root'),modal=document.getElementById('modal'),mbox=document.getElementById('mbox'),toastEl=document.getElementById('toast'),tt;
+function $(s,r){return (r||document).querySelector(s)}
+function toast(m,err){toastEl.textContent=m;toastEl.className='toast on'+(err?' err':'');clearTimeout(tt);tt=setTimeout(function(){toastEl.className='toast'},3500)}
+function openM(h){mbox.innerHTML=h;modal.classList.add('on')}function closeM(){modal.classList.remove('on');mbox.innerHTML=''}
+modal.addEventListener('mousedown',function(e){if(e.target===modal)closeM()});document.addEventListener('keydown',function(e){if(e.key==='Escape')closeM()});
+function denied(t,p,link){root.innerHTML='<div class="denied"><h1 class="serif" style="font-size:34px">'+t+'</h1><p class="muted">'+p+'</p>'+(link||'')+'</div>'}
+function imgUrl(u){return /^https?:/.test(u)?u:'../'+u}
+function slugify(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+function cents(v){var n=Math.round(parseFloat(String(v).replace(/\./g,'').replace(',','.'))*100);return isNaN(n)?null:n}
+function real(c){return (c/100).toFixed(2).replace('.',',')}
+function err(e,m){console.error(e);toast(m||'Não foi possível concluir a ação. '+((e&&e.code==='42501')?'Sem permissão.':''),1)}
+
+if(!window.KB_READY||!window.sb){denied('Em configuração','Preencha <code>js/config.js</code> com os dados do Supabase.');return}
+
+var ic={dash:'<svg viewBox="0 0 16 16"><rect x="1.5" y="1.5" width="5" height="6"/><rect x="9.5" y="1.5" width="5" height="3.5"/><rect x="9.5" y="8" width="5" height="6.5"/><rect x="1.5" y="10.5" width="5" height="4"/></svg>',
+ prod:'<svg viewBox="0 0 16 16"><path d="M5 1.5h6v3H5zM3.5 4.5h9v10h-9z"/></svg>',ped:'<svg viewBox="0 0 16 16"><path d="M1.5 3h2l1.5 8h7.5l1.5-6H4.2"/><circle cx="6" cy="13.5" r="1"/><circle cx="11.5" cy="13.5" r="1"/></svg>',
+ cli:'<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14.5c.5-3 3-4.5 6-4.5s5.500 1.500 6 4.500"/></svg>',con:'<svg viewBox="0 0 16 16"><path d="M2 3h12M2 7h12M2 11h8"/></svg>'};
+var TABS=[['dash','Dashboard'],['prod','Produtos'],['ped','Pedidos'],['cli','Clientes'],['con','Conteúdo']];
+var cur='dash',me=null;
+
+function layout(){
+ root.innerHTML='<div class="app"><aside class="sb" id="sb"><a class="logo" href="../index.html"><b>KORBOLY</b><i>ADMIN</i></a><nav class="lbl" id="nav">'+
+ TABS.map(function(t){return '<button data-t="'+t[0]+'">'+ic[t[0]]+t[1]+'</button>'}).join('')+'</nav><div class="bot"><a class="btn sm" href="../index.html">Ver a loja</a><a class="btn sm" href="../conta.html">Minha conta</a></div></aside>'+
+ '<div><div class="top"><button class="btn sm mbtn" id="mb">Menu</button><span></span><div class="who"><b>'+esc(me.full_name||'Administrador')+'</b>Administrador</div></div><div class="cont" id="cont"></div></div></div>';
+ $('#nav').onclick=function(e){var b=e.target.closest('button');if(b){cur=b.dataset.t;go();$('#sb').classList.remove('on')}};
+ $('#mb').onclick=function(){$('#sb').classList.toggle('on')};go()}
+function go(){[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.dataset.t===cur)});
+ var c=$('#cont');c.innerHTML='<p class="muted">Carregando…</p>';({dash:vDash,prod:vProd,ped:vPed,cli:vCli,con:vCon})[cur](c).catch(function(e){err(e,'Erro ao carregar.');c.innerHTML='<p class="msg err">Não foi possível carregar esta seção.</p>'})}
+
+/* ---------- Dashboard ---------- */
+async function vDash(c){
+ var days=30;
+ var s=await sb.rpc('admin_stats');if(s.error)throw s.error;s=s.data;
+ c.innerHTML='<h1 class="serif">Dashboard</h1><div class="stats">'+
+ stat('Faturamento total',brl(s.revenue_cents))+stat('Vendas do mês',brl(s.month_cents))+stat('Pedidos',s.orders)+stat('Clientes',s.customers)+'</div>'+
+ '<div class="grid2"><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 class="lbl muted" style="margin:0">Vendas por período</h3><select id="per" class="lbl" style="background:transparent;color:var(--ink);border:1px solid #2a2d2d;padding:6px"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option></select></div><div id="chart"></div></div>'+
+ '<div class="panel"><h3 class="lbl muted">Mais vendidos</h3>'+(s.top_products.length?s.top_products.map(function(t){return '<div class="bar-h"><span>'+esc(t.name)+'</span><b>'+t.qty+' un.</b></div>'}).join(''):'<p class="muted">Sem vendas pagas ainda.</p>')+'</div></div>'+
+ '<div class="panel"><h3 class="lbl muted">Pedidos recentes</h3><div id="rec"></div></div>';
+ async function chart(d){var r=await sb.rpc('admin_sales_by_day',{p_days:d});if(r.error)return err(r.error);
+  var max=Math.max.apply(null,r.data.map(function(x){return x.total_cents}).concat([1])),tot=r.data.reduce(function(a,x){return a+x.total_cents},0);
+  $('#chart').innerHTML='<p class="muted" style="margin:0 0 10px;font-size:13px">Total no período: <b style="color:var(--ink)">'+brl(tot)+'</b> (pedidos pagos)</p><div class="bars">'+r.data.map(function(x){return '<i title="'+dt(x.day+'T12:00:00')+': '+brl(x.total_cents)+'" style="height:0" data-h="'+Math.round(x.total_cents/max*100)+'%"></i>'}).join('')+'</div><div class="axis"><span>'+dt(r.data[0].day+'T12:00:00')+'</span><span>'+dt(r.data[r.data.length-1].day+'T12:00:00')+'</span></div>';
+  requestAnimationFrame(function(){[].forEach.call(document.querySelectorAll('.bars i'),function(i){i.style.height=i.dataset.h})})}
+ $('#per').onchange=function(){chart(+this.value)};chart(days);
+ var o=await sb.from('orders').select('number,customer_name,total_cents,status,payment_status,created_at').order('created_at',{ascending:false}).limit(6);
+ $('#rec').innerHTML=o.data&&o.data.length?'<table><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Data</th></tr></thead><tbody>'+o.data.map(function(x){return '<tr><td>#'+x.number+'</td><td>'+esc(x.customer_name)+'</td><td>'+brl(x.total_cents)+'</td><td>'+esc(PAY[x.payment_status])+'</td><td>'+esc(STATUS[x.status])+'</td><td>'+dt(x.created_at)+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum pedido ainda.</p>'}
+function stat(l,v){return '<div class="stat"><span class="lbl muted">'+l+'</span><div class="v">'+v+'</div></div>'}
+
+/* ---------- Produtos ---------- */
+async function vProd(c){
+ var r=await Promise.all([sb.from('products').select('*').order('position').order('created_at'),sb.from('categories').select('*').order('position')]);
+ if(r[0].error)throw r[0].error;var P=r[0].data,C=r[1].data||[];
+ c.innerHTML='<h1 class="serif">Produtos</h1><div class="tools"><button class="btn solid sm" id="np">Novo perfume</button><button class="btn sm" id="cats">Categorias</button></div><div class="panel"><table><thead><tr><th></th><th>Produto</th><th>Preço</th><th>Estoque</th><th>Status</th><th></th></tr></thead><tbody>'+
+ (P.length?P.map(function(p){return '<tr><td>'+(p.images[0]?'<img class="pimg" src="'+esc(imgUrl(p.images[0]))+'" alt="">':'')+'</td><td><b>'+esc(p.name)+'</b><br><span class="muted" style="font-size:12px">'+(p.volume_ml?p.volume_ml+' ML':'')+(p.featured?' · destaque':'')+'</span></td><td>'+brl(p.price_cents)+'</td><td>'+(p.stock==null?'<span class="muted">não controlado</span>':p.stock)+'</td><td><span class="tag '+(p.available?'ok':'err')+'">'+(p.available?'Disponível':'Indisponível')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-e="'+p.id+'">Editar</button> <button class="btn sm danger" data-d="'+p.id+'">Excluir</button></td></tr>'}).join(''):'<tr><td colspan="6" class="muted">Nenhum produto.</td></tr>')+'</tbody></table></div>';
+ $('#np').onclick=function(){fProd(null,C)};$('#cats').onclick=function(){fCats(C)};
+ c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.e)fProd(P.find(function(x){return x.id===b.dataset.e}),C);
+  if(b.dataset.d&&confirm('Excluir este produto? Pedidos antigos continuam salvos.')){var d=await sb.from('products').delete().eq('id',b.dataset.d);if(d.error)err(d.error);else{toast('Produto excluído.');go()}}}}
+function fProd(p,C){p=p||{};var imgs=(p.images||[]).slice();
+ openM('<h2 class="serif" style="margin:0 0 20px">'+(p.id?'Editar produto':'Novo perfume')+'</h2><form id="pf" novalidate>'+
+ '<label class="fld"><span class="lbl">Nome</span><input name="name" maxlength="80" value="'+esc(p.name||'')+'" required></label>'+
+ '<label class="fld"><span class="lbl">Descrição</span><textarea name="desc" maxlength="1200">'+esc(p.description||'')+'</textarea></label>'+
+ '<div class="row3"><label class="fld"><span class="lbl">Preço (R$)</span><input name="price" inputmode="decimal" value="'+(p.price_cents!=null?real(p.price_cents):'')+'" required></label>'+
+ '<label class="fld"><span class="lbl">Volume (ML)</span><input name="vol" inputmode="numeric" value="'+(p.volume_ml||'')+'"></label>'+
+ '<label class="fld"><span class="lbl">Estoque</span><input name="stock" inputmode="numeric" placeholder="vazio = não controlar" value="'+(p.stock==null?'':p.stock)+'"></label></div>'+
+ '<label class="fld"><span class="lbl">Categoria</span><select name="cat"><option value="">—</option>'+C.map(function(x){return '<option value="'+x.id+'"'+(x.id===p.category_id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label>'+
+ '<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px"><label class="switch"><input type="checkbox" name="av"'+(p.available!==false?' checked':'')+'><span class="lbl">Disponível para venda</span></label><label class="switch"><input type="checkbox" name="ft"'+(p.featured?' checked':'')+'><span class="lbl">Destaque</span></label></div>'+
+ '<span class="lbl muted">Imagens</span><div class="thumbs" id="th"></div><input type="file" id="up" accept="image/jpeg,image/png,image/webp" multiple style="margin-bottom:18px">'+
+ '<p class="msg" id="pm"></p><div style="display:flex;gap:10px"><button class="btn solid">Salvar</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
+ function th(){$('#th').innerHTML=imgs.map(function(u,i){return '<div><img src="'+esc(imgUrl(u))+'" alt=""><button type="button" data-i="'+i+'" aria-label="Remover">×</button></div>'}).join('')}th();
+ $('#th').onclick=function(e){var b=e.target.closest('button');if(b){imgs.splice(+b.dataset.i,1);th()}};
+ $('#cx').onclick=closeM;
+ $('#up').onchange=async function(){var fs=[].slice.call(this.files);for(var i=0;i<fs.length;i++){var f=fs[i];if(f.size>5*1024*1024){toast('Imagem maior que 5 MB.',1);continue}
+  var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'})[f.type];if(!ext){toast('Formato não aceito.',1);continue}
+  var path='produtos/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;var u=await sb.storage.from('korboly').upload(path,f,{contentType:f.type});
+  if(u.error){err(u.error,'Falha ao enviar a imagem.');continue}imgs.push(sb.storage.from('korboly').getPublicUrl(path).data.publicUrl)}th();this.value=''};
+ $('#pf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#pm');
+  var price=cents(f.price.value),stock=f.stock.value.trim()===''?null:parseInt(f.stock.value,10),vol=f.vol.value.trim()===''?null:parseInt(f.vol.value,10);
+  if(!f.name.value.trim())return msg(m,'Informe o nome.');if(price==null||price<0)return msg(m,'Preço inválido.');
+  if(stock!=null&&(isNaN(stock)||stock<0))return msg(m,'Estoque inválido.');if(vol!=null&&isNaN(vol))return msg(m,'Volume inválido.');
+  var row={name:f.name.value.trim(),description:f.desc.value.trim(),price_cents:price,volume_ml:vol,stock:stock,available:f.av.checked,featured:f.ft.checked,category_id:f.cat.value||null,images:imgs};
+  var res;if(p.id)res=await sb.from('products').update(row).eq('id',p.id);else{row.slug=slugify(row.name)+'-'+Math.random().toString(36).slice(2,5);res=await sb.from('products').insert(row)}
+  if(res.error)return msg(m,'Não foi possível salvar.');closeM();toast('Produto salvo.');go()}}
+function msg(el,t,ok){el.className='msg '+(ok?'ok':'err');el.textContent=t||''}
+function fCats(C){openM('<h2 class="serif" style="margin:0 0 20px">Categorias</h2><div id="cl">'+C.map(function(x){return '<div class="bar-h"><span>'+esc(x.name)+'</span><button class="btn sm danger" data-d="'+x.id+'">Excluir</button></div>'}).join('')+'</div><form id="cf" style="display:flex;gap:10px;margin-top:18px"><input class="fld" style="flex:1;background:transparent;border:0;border-bottom:1px solid #3a3f3c;color:var(--ink);font:inherit;font-size:16px" name="n" placeholder="Nova categoria" maxlength="40" required><button class="btn sm solid">Adicionar</button></form><div style="margin-top:20px"><button class="btn sm" id="cx">Fechar</button></div>');
+ $('#cx').onclick=closeM;$('#cf').onsubmit=async function(e){e.preventDefault();var n=e.target.n.value.trim();if(!n)return;var r=await sb.from('categories').insert({name:n,position:C.length+1});if(r.error)return err(r.error,'Categoria já existe ou inválida.');closeM();toast('Categoria criada.');go()};
+ $('#cl').onclick=async function(e){var b=e.target.closest('button');if(!b||!confirm('Excluir categoria?'))return;var r=await sb.from('categories').delete().eq('id',b.dataset.d);if(r.error)return err(r.error);closeM();go()}}
+
+/* ---------- Pedidos ---------- */
+async function vPed(c){
+ c.innerHTML='<h1 class="serif">Pedidos</h1><div class="tools"><input id="q" placeholder="Buscar por nº, nome ou e-mail"><select id="st"><option value="">Todos os status</option>'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'">'+STATUS[k]+'</option>'}).join('')+'</select><select id="ps"><option value="">Todos os pagamentos</option>'+Object.keys(PAY).map(function(k){return '<option value="'+k+'">'+PAY[k]+'</option>'}).join('')+'</select></div><div class="panel" id="tb"></div>';
+ async function load(){var q=$('#q').value.trim().replace(/[%,()*]/g,' '),qb=sb.from('orders').select('*').order('created_at',{ascending:false}).limit(200);
+  if($('#st').value)qb=qb.eq('status',$('#st').value);if($('#ps').value)qb=qb.eq('payment_status',$('#ps').value);
+  if(q){var f='customer_name.ilike.%'+q+'%,customer_email.ilike.%'+q+'%';if(/^\d+$/.test(q))f+=',number.eq.'+q;qb=qb.or(f)}
+  var r=await qb;if(r.error)return err(r.error);var O=r.data;
+  $('#tb').innerHTML=O.length?'<table><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Data</th></tr></thead><tbody>'+O.map(function(o){return '<tr class="clk" data-id="'+o.id+'"><td><b>#'+o.number+'</b></td><td>'+esc(o.customer_name)+'<br><span class="muted" style="font-size:12px">'+esc(o.customer_email)+'</span></td><td>'+brl(o.total_cents)+'</td><td><span class="tag '+(o.payment_status==='pago'?'ok':(o.payment_status==='recusado'?'err':''))+'">'+PAY[o.payment_status]+'</span></td><td><span class="tag">'+STATUS[o.status]+'</span></td><td>'+dt(o.created_at)+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum pedido encontrado.</p>';
+  $('#tb').onclick=function(e){var tr=e.target.closest('tr.clk');if(tr)fPed(O.find(function(x){return x.id===tr.dataset.id}))}}
+ var t;$('#q').oninput=function(){clearTimeout(t);t=setTimeout(load,350)};$('#st').onchange=load;$('#ps').onchange=load;load()}
+async function fPed(o){var it=await sb.from('order_items').select('*').eq('order_id',o.id),a=o.shipping_address||{};
+ openM('<h2 class="serif" style="margin:0 0 4px">Pedido #'+o.number+'</h2><p class="muted" style="margin:0 0 18px">'+dt(o.created_at)+'</p>'+
+ '<div class="panel" style="padding:16px"><b>'+esc(o.customer_name)+'</b><br><span class="muted">'+esc(o.customer_email)+(o.customer_phone?' · '+esc(o.customer_phone):'')+'</span><p class="muted" style="margin:10px 0 0">'+esc(a.street)+', '+esc(a.number)+(a.complement?' – '+esc(a.complement):'')+'<br>'+esc(a.district)+' · '+esc(a.city)+'/'+esc(a.state)+' · CEP '+esc(a.zip)+'</p></div>'+
+ '<table><tbody>'+(it.data||[]).map(function(i){return '<tr><td>'+i.quantity+'× '+esc(i.product_name)+'</td><td style="text-align:right">'+brl(i.unit_price_cents*i.quantity)+'</td></tr>'}).join('')+
+ (o.discount_cents?'<tr><td class="muted">Desconto'+(o.coupon_code?' ('+esc(o.coupon_code)+')':'')+'</td><td style="text-align:right">− '+brl(o.discount_cents)+'</td></tr>':'')+'<tr><td><b>Total</b></td><td style="text-align:right"><b>'+brl(o.total_cents)+'</b></td></tr></tbody></table><br>'+
+ '<form id="of"><div class="row2"><label class="fld"><span class="lbl">Status do pedido</span><select name="st">'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(k===o.status?' selected':'')+'>'+STATUS[k]+'</option>'}).join('')+'</select></label>'+
+ '<label class="fld"><span class="lbl">Pagamento</span><select name="ps">'+Object.keys(PAY).map(function(k){return '<option value="'+k+'"'+(k===o.payment_status?' selected':'')+'>'+PAY[k]+'</option>'}).join('')+'</select></label></div>'+
+ '<label class="fld"><span class="lbl">Código de rastreamento</span><input name="tr" maxlength="40" value="'+esc(o.tracking_code||'')+'"></label><p class="msg" id="om"></p><div style="display:flex;gap:10px"><button class="btn solid">Salvar</button><button type="button" class="btn" id="cx">Fechar</button></div></form>');
+ $('#cx').onclick=closeM;$('#of').onsubmit=async function(e){e.preventDefault();var f=e.target;
+  var r=await sb.from('orders').update({status:f.st.value,payment_status:f.ps.value,tracking_code:f.tr.value.trim()||null}).eq('id',o.id);
+  if(r.error)return msg($('#om'),'Não foi possível salvar.');closeM();toast('Pedido atualizado.');go()}}
+
+/* ---------- Clientes ---------- */
+async function vCli(c){var r=await sb.rpc('admin_customers');if(r.error)throw r.error;var L=r.data;
+ c.innerHTML='<h1 class="serif">Clientes</h1><div class="tools"><input id="q" placeholder="Buscar cliente"><span class="muted" style="font-size:13px">'+L.length+' cadastrados</span></div><div class="panel" id="tb"></div>';
+ function draw(){var q=$('#q').value.trim().toLowerCase(),F=L.filter(function(x){return !q||(x.full_name+' '+x.email).toLowerCase().indexOf(q)>-1});
+  $('#tb').innerHTML=F.length?'<table><thead><tr><th>Cliente</th><th>Telefone</th><th>Cadastro</th><th>Pedidos</th><th>Total gasto</th><th></th></tr></thead><tbody>'+F.map(function(x){return '<tr class="clk" data-id="'+x.id+'"><td><b>'+esc(x.full_name)+'</b><br><span class="muted" style="font-size:12px">'+esc(x.email)+'</span></td><td>'+esc(x.phone||'—')+'</td><td>'+dt(x.created_at)+'</td><td>'+x.orders+'</td><td>'+brl(x.spent_cents)+'</td><td>'+(x.orders>1?'<span class="tag ok">Recorrente</span>':'')+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum cliente encontrado.</p>'}
+ draw();$('#q').oninput=draw;
+ $('#tb').onclick=async function(e){var tr=e.target.closest('tr.clk');if(!tr)return;var x=L.find(function(y){return y.id===tr.dataset.id});
+  var o=await sb.from('orders').select('number,total_cents,status,payment_status,created_at').eq('user_id',x.id).order('created_at',{ascending:false});
+  openM('<h2 class="serif" style="margin:0 0 4px">'+esc(x.full_name)+'</h2><p class="muted" style="margin:0 0 18px">'+esc(x.email)+(x.phone?' · '+esc(x.phone):'')+'<br>Cliente desde '+dt(x.created_at)+' · gasto total '+brl(x.spent_cents)+'</p><h3 class="lbl muted">Histórico de compras</h3>'+
+  ((o.data&&o.data.length)?'<table><tbody>'+o.data.map(function(y){return '<tr><td>#'+y.number+'</td><td>'+dt(y.created_at)+'</td><td>'+brl(y.total_cents)+'</td><td>'+PAY[y.payment_status]+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Sem pedidos.</p>')+'<br><button class="btn sm" id="cx">Fechar</button>');$('#cx').onclick=closeM}}
+
+/* ---------- Conteúdo ---------- */
+var TEXTS=[['hero_title','Título da página inicial'],['about','Texto institucional (Sobre)'],['shipping_note','Aviso de entrega / frete'],['contact_email','E-mail de contato'],['whatsapp','WhatsApp (somente números com DDD)']];
+async function vCon(c){
+ var r=await Promise.all([sb.from('banners').select('*').order('position'),sb.from('coupons').select('*').order('code'),sb.from('site_content').select('*')]);
+ var B=r[0].data||[],K=r[1].data||[],S={};(r[2].data||[]).forEach(function(x){S[x.key]=x.value});
+ c.innerHTML='<h1 class="serif">Conteúdo</h1>'+
+ '<div class="panel sec"><h3 class="lbl muted">Textos e informações institucionais</h3><form id="tf">'+TEXTS.map(function(t){return '<label class="fld"><span class="lbl">'+t[1]+'</span>'+(t[0]==='about'?'<textarea name="'+t[0]+'" maxlength="2000">'+esc(S[t[0]]||'')+'</textarea>':'<input name="'+t[0]+'" maxlength="200" value="'+esc(S[t[0]]||'')+'">')+'</label>'}).join('')+'<p class="msg" id="tm"></p><button class="btn solid sm">Salvar textos</button></form></div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 class="lbl muted" style="margin:0">Banners da página inicial</h3><button class="btn sm" id="nb">Novo banner</button></div>'+(B.length?'<table><tbody>'+B.map(function(b){return '<tr><td><img class="pimg" style="width:90px;height:50px" src="'+esc(imgUrl(b.image_url))+'" alt=""></td><td>'+esc(b.title)+'<br><span class="muted" style="font-size:12px">'+esc(b.link_url||'')+'</span></td><td><span class="tag '+(b.active?'ok':'err')+'">'+(b.active?'Ativo':'Inativo')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-be="'+b.id+'">Editar</button> <button class="btn sm danger" data-bd="'+b.id+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum banner. O site usa o banner padrão.</p>')+'</div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 class="lbl muted" style="margin:0">Ofertas e cupons</h3><button class="btn sm" id="nk">Novo cupom</button></div>'+(K.length?'<table><thead><tr><th>Código</th><th>Desconto</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody>'+K.map(function(k){return '<tr><td><b>'+esc(k.code)+'</b></td><td>'+(k.kind==='percent'?k.value+'%':brl(k.value))+'</td><td>'+k.used+(k.max_uses?' / '+k.max_uses:'')+'</td><td>'+(k.expires_at?dt(k.expires_at):'—')+'</td><td><span class="tag '+(k.active?'ok':'err')+'">'+(k.active?'Ativo':'Inativo')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-kt="'+k.code+'">'+(k.active?'Desativar':'Ativar')+'</button> <button class="btn sm danger" data-kd="'+k.code+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum cupom.</p>')+'</div>';
+ $('#tf').onsubmit=async function(e){e.preventDefault();var f=e.target,rows=TEXTS.map(function(t){return {key:t[0],value:f[t[0]].value.trim(),updated_at:new Date().toISOString()}});
+  var u=await sb.from('site_content').upsert(rows);if(u.error)return msg($('#tm'),'Não foi possível salvar.');msg($('#tm'),'Textos salvos.',true)};
+ $('#nb').onclick=function(){fBan(null,B.length)};
+ $('#nk').onclick=fCup;
+ c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.be)fBan(B.find(function(x){return x.id===d.be}),B.length);
+  if(d.bd&&confirm('Excluir banner?')){var x=await sb.from('banners').delete().eq('id',d.bd);if(x.error)err(x.error);else go()}
+  if(d.kt){var k=K.find(function(z){return z.code===d.kt}),x=await sb.from('coupons').update({active:!k.active}).eq('code',d.kt);if(x.error)err(x.error);else go()}
+  if(d.kd&&confirm('Excluir cupom?')){var y=await sb.from('coupons').delete().eq('code',d.kd);if(y.error)err(y.error);else go()}}}
+function fBan(b,n){b=b||{};var img=b.image_url||'';
+ openM('<h2 class="serif" style="margin:0 0 20px">'+(b.id?'Editar banner':'Novo banner')+'</h2><form id="bf"><label class="fld"><span class="lbl">Título</span><input name="t" maxlength="80" value="'+esc(b.title||'')+'" required></label><label class="fld"><span class="lbl">Link ao clicar</span><input name="l" maxlength="300" value="'+esc(b.link_url||'')+'"></label>'+
+ '<div id="bi" class="thumbs"></div><input type="file" id="bu" accept="image/jpeg,image/png,image/webp" style="margin-bottom:16px"><label class="switch" style="margin-bottom:16px"><input type="checkbox" name="a"'+(b.active!==false?' checked':'')+'><span class="lbl">Ativo</span></label><p class="msg" id="bm"></p><div style="display:flex;gap:10px"><button class="btn solid">Salvar</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
+ function ph(){$('#bi').innerHTML=img?'<div><img style="width:160px;height:70px" src="'+esc(imgUrl(img))+'" alt=""></div>':''}ph();$('#cx').onclick=closeM;
+ $('#bu').onchange=async function(){var f=this.files[0];if(!f)return;if(f.size>5*1024*1024)return toast('Imagem maior que 5 MB.',1);var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'})[f.type];if(!ext)return toast('Formato não aceito.',1);
+  var path='banners/'+Date.now()+'.'+ext,u=await sb.storage.from('korboly').upload(path,f,{contentType:f.type});if(u.error)return err(u.error,'Falha ao enviar a imagem.');img=sb.storage.from('korboly').getPublicUrl(path).data.publicUrl;ph()};
+ $('#bf').onsubmit=async function(e){e.preventDefault();var f=e.target,l=f.l.value.trim();if(!img)return msg($('#bm'),'Envie a imagem do banner.');if(l&&!/^(https?:\/\/|\/|#)/.test(l))return msg($('#bm'),'Link inválido.');
+  var row={title:f.t.value.trim(),link_url:l||null,image_url:img,active:f.a.checked},r=b.id?await sb.from('banners').update(row).eq('id',b.id):await sb.from('banners').insert(Object.assign({position:n+1},row));
+  if(r.error)return msg($('#bm'),'Não foi possível salvar.');closeM();toast('Banner salvo.');go()}}
+function fCup(){openM('<h2 class="serif" style="margin:0 0 20px">Novo cupom</h2><form id="kf"><label class="fld"><span class="lbl">Código</span><input name="c" maxlength="30" style="text-transform:uppercase" required></label><div class="row2"><label class="fld"><span class="lbl">Tipo</span><select name="k"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select></label><label class="fld"><span class="lbl">Valor</span><input name="v" inputmode="decimal" required></label></div><div class="row2"><label class="fld"><span class="lbl">Validade (opcional)</span><input name="e" type="date"></label><label class="fld"><span class="lbl">Limite de usos (opcional)</span><input name="m" inputmode="numeric"></label></div><p class="msg" id="km"></p><div style="display:flex;gap:10px"><button class="btn solid">Criar cupom</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
+ $('#cx').onclick=closeM;$('#kf').onsubmit=async function(e){e.preventDefault();var f=e.target,code=f.c.value.trim().toUpperCase().replace(/\s/g,''),kind=f.k.value,v=kind==='percent'?parseInt(f.v.value,10):cents(f.v.value);
+  if(!/^[A-Z0-9_-]{3,30}$/.test(code))return msg($('#km'),'Código: 3 a 30 letras ou números.');if(!v||v<1||(kind==='percent'&&v>100))return msg($('#km'),'Valor inválido.');
+  var mx=f.m.value.trim()?parseInt(f.m.value,10):null,r=await sb.from('coupons').insert({code:code,kind:kind,value:v,expires_at:f.e.value?new Date(f.e.value+'T23:59:59').toISOString():null,max_uses:mx});
+  if(r.error)return msg($('#km'),'Não foi possível criar (o código já existe?).');closeM();toast('Cupom criado.');go()}}
+
+/* ---------- Acesso ---------- */
+async function boot(){
+ var s=await sb.auth.getSession();if(!s.data.session){denied('Área restrita','Entre com a conta de administrador.','<a class="btn" href="../conta.html">Entrar</a>');return}
+ var r=await sb.from('profiles').select('*').eq('id',s.data.session.user.id).single();
+ if(r.error||!r.data||r.data.role!=='admin'){denied('Acesso negado','Esta área é exclusiva do administrador da Korboly.','<a class="btn" href="../index.html">Voltar à loja</a>');return}
+ me=r.data;layout()}
+boot();
+})();
+</script>
+</body></html>
