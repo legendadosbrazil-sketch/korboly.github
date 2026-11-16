@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Perguntas frequentes – Korboly</title>
+<meta name="description" content="Dúvidas sobre fragrâncias, pedidos, pagamentos, entrega, trocas, privacidade e atendimento da Korboly.">
+<link rel="canonical" href="https://korboly.com.br/faq.html">
+<meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-welcome>
+<a class="skip lbl" href="#main">Ir para o conteúdo</a>
+<header class="kbh">
+  <a href="index.html" class="back lbl" aria-label="Voltar à loja">←<span class="bt"> Voltar à loja</span></a>
+  <a href="index.html" class="logo" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a>
+  <span class="sp" aria-hidden="true"></span>
+</header>
+
+<main class="doc" id="main">
+  <p class="eyebrow lbl">Atendimento</p>
+  <h1>Perguntas frequentes</h1>
+  <p class="lead">Respostas rápidas sobre nossas fragrâncias, pedidos, entregas, trocas e privacidade.</p>
+
+  <div class="faq-tools">
+    <div class="faq-search">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="7.5" cy="7.5" r="6"/><path d="M12 12l5 5"/></svg>
+      <label for="q" class="skip">Buscar nas perguntas</label>
+      <input id="q" type="search" placeholder="Buscar uma dúvida" autocomplete="off" aria-controls="faq" aria-describedby="count">
+    </div>
+    <nav class="chips lbl" id="chips" aria-label="Categorias"></nav>
+  </div>
+  <p id="count" class="skip" role="status" aria-live="polite"></p>
+
+  <div id="faq"><p class="state">Carregando perguntas…</p></div>
+
+  <section class="faq-help" aria-labelledby="help-t">
+    <h2 id="help-t">Não encontrou o que procurava?</h2>
+    <p id="help-p">Fale com a gente pelo Instagram <a href="https://instagram.com/korboly" rel="noopener" style="border-bottom:1px solid var(--line2)">@korboly</a>.</p>
+    <div class="cta-row" style="margin-top:0"><a class="btn sm solid" href="https://instagram.com/korboly" rel="noopener">Falar no Instagram</a><a class="btn sm" href="privacidade.html">Política de Privacidade</a></div>
+  </section>
+</main>
+
+<footer class="kbf"><div class="w">
+  <div><a class="lg" href="index.html" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><p>© Korboly. Todos os direitos reservados.</p></div>
+  <nav aria-label="Rodapé"><a href="index.html#mais">Catálogo</a><a href="faq.html" aria-current="page">Perguntas frequentes</a><a href="privacidade.html">Privacidade</a><button type="button" data-cookie-prefs>Preferências de cookies</button><a href="https://instagram.com/korboly" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@korboly.perfumaria" rel="noopener">TikTok</a></nav>
+</div></footer>
+<div class="grain"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/md.js"></script>
+<script src="js/consent.js"></script>
+<script src="js/welcome.js" defer></script>
+<script>
+(function () {
+  var faq = document.getElementById('faq'), chips = document.getElementById('chips'), q = document.getElementById('q'), count = document.getElementById('count');
+  var data = [];
+  function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function fail() {
+    faq.innerHTML = '<p class="state">Não foi possível carregar as perguntas agora. <button type="button" class="btn sm" id="retry">Tentar de novo</button></p>';
+    document.getElementById('retry').onclick = function () { faq.innerHTML = '<p class="state">Carregando perguntas…</p>'; load(); };
+  }
+
+  function render(filter) {
+    var f = norm(filter).trim(), shown = 0;
+    var html = data.map(function (c) {
+      var its = c.items.filter(function (i) { return !f || i._text.indexOf(f) > -1; });
+      shown += its.length;
+      if (!its.length) return '';
+      return '<section class="faq-cat" id="' + c.slug + '" aria-labelledby="h-' + c.slug + '"><h2 id="h-' + c.slug + '">' + esc(c.name) + '</h2>' +
+        its.map(function (i) {
+          return '<details id="p-' + i.id + '"' + (f ? ' open' : '') + '><summary>' + esc(i.question) + '<i aria-hidden="true"></i></summary><div class="faq-a">' + i._html + '</div></details>';
+        }).join('') + '</section>';
+    }).join('');
+    faq.innerHTML = html || '<p class="faq-empty">Nenhuma pergunta encontrada para “' + esc(filter) + '”. Tente outras palavras ou fale com a gente.</p>';
+    count.textContent = f ? shown + (shown === 1 ? ' pergunta encontrada' : ' perguntas encontradas') : '';
+  }
+
+  function load() {
+    if (!window.KBAPI || !KBAPI.ok) return fail();
+    Promise.all([
+      KBAPI.get('faq_categories?select=id,name,position&order=position.asc,name.asc'),
+      KBAPI.get('faq_items?select=id,category_id,question,answer,position&published=eq.true&order=position.asc'),
+      KBAPI.tokens().catch(function () { return {}; })
+    ]).then(function (r) {
+      var cats = r[0] || [], items = r[1] || [], tk = r[2] || {};
+      data = cats.map(function (c) {
+        var its = items.filter(function (i) { return i.category_id === c.id; }).map(function (i) {
+          i._html = kbmd(i.answer, tk); i._plain = kbmdText(i.answer, tk); i._text = norm(i.question + ' ' + i._plain); return i;
+        });
+        return { name: c.name, slug: slug(c.name), items: its };
+      }).filter(function (c) { return c.items.length; });
+      chips.innerHTML = data.map(function (c) { return '<a href="#' + c.slug + '">' + esc(c.name) + '</a>'; }).join('');
+      if (tk.email) {
+        document.getElementById('help-p').innerHTML = 'Escreva para <a href="mailto:' + esc(tk.email) + '" style="border-bottom:1px solid var(--line2)">' + esc(tk.email) + '</a> ou fale com a gente pelo Instagram <a href="https://instagram.com/korboly" rel="noopener" style="border-bottom:1px solid var(--line2)">@korboly</a>.';
+      }
+      var params = new URLSearchParams(location.search);
+      if (params.get('q')) q.value = params.get('q');
+      render(q.value);
+      if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) { if (t.tagName === 'DETAILS') t.open = true; t.scrollIntoView(); } }
+      // dados estruturados para buscadores (FAQPage)
+      var ld = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [] };
+      data.forEach(function (c) { c.items.forEach(function (i) { ld.mainEntity.push({ '@type': 'Question', name: i.question, acceptedAnswer: { '@type': 'Answer', text: i._plain } }); }); });
+      var s = document.createElement('script'); s.type = 'application/ld+json'; s.textContent = JSON.stringify(ld); document.head.appendChild(s);
+    }).catch(fail);
+  }
+
+  var tm;
+  q.addEventListener('input', function () { clearTimeout(tm); tm = setTimeout(function () { render(q.value); }, 120); });
+  load();
+})();
+</script>
+</body>
+</html>

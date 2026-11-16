@@ -13,6 +13,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
 <link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/site.css">
 <style>
 header{display:flex;justify-content:space-between;align-items:center;padding:0 clamp(16px,3vw,32px);height:72px;border-bottom:1px solid var(--line)}
 .back{color:var(--muted)}.back:hover{color:var(--ink)}
@@ -43,10 +44,14 @@ main{max-width:1060px;margin:0 auto;padding:clamp(28px,6vw,64px) clamp(16px,4vw,
 <body>
 <header><a href="index.html" class="back lbl">← Voltar à loja</a><a href="index.html" class="logo"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><span style="width:100px"></span></header>
 <main id="app"></main>
+<footer class="kbf"><div class="w">
+  <div><a class="lg" href="index.html" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><p>© Korboly. Todos os direitos reservados.</p></div>
+  <nav aria-label="Rodapé"><a href="index.html#mais">Catálogo</a><a href="faq.html">Perguntas frequentes</a><a href="privacidade.html">Privacidade</a><button type="button" data-cookie-prefs>Preferências de cookies</button></nav>
+</div></footer>
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script src="js/config.js"></script><script src="js/sb.js"></script>
+<script src="js/config.js"></script><script src="js/sb.js"></script><script src="js/api.js"></script><script src="js/consent.js"></script>
 <script>
 (function(){
 var app=document.getElementById('app'),toastEl=document.getElementById('toast'),tt;
@@ -93,6 +98,7 @@ function viewSignup(){
  '<div class="row2"><label class="fld"><span class="lbl">Senha</span><input name="pw" type="password" autocomplete="new-password" required></label>'+
  '<label class="fld"><span class="lbl">Confirmar senha</span><input name="pw2" type="password" autocomplete="new-password" required></label></div>'+
  '<p class="muted" style="font-size:13px;margin:-6px 0 18px">Mínimo de 8 caracteres, com letras e números.</p>'+
+ '<p class="muted" style="font-size:12.5px;margin:0 0 16px">Ao criar sua conta, seus dados serão tratados conforme a nossa <a href="privacidade.html" style="border-bottom:1px solid var(--line2)">Política de Privacidade</a>.</p>'+
  '<p class="msg" id="m" role="alert"></p><button class="btn solid" style="width:100%" id="go">Criar minha conta</button></form>'+
  '<div class="alt"><button id="lg" type="button">Já tenho conta</button></div></div>';
  $('#lg').onclick=viewLogin;
@@ -140,13 +146,13 @@ function shell(){
  app.innerHTML='<div class="dash"><aside class="side"><h1 class="serif">Olá, '+esc(first)+'</h1><p class="em">'+esc(user.email)+'</p>'+
  '<nav class="nav lbl" id="nav"></nav>'+
  '<div style="margin-top:24px;display:flex;flex-direction:column;gap:12px">'+(profile.role==='admin'?'<a class="btn sm" href="admin/">Painel admin</a>':'')+'<button class="btn sm" id="out">Sair da conta</button></div></aside><section class="pane" id="pane"></section></div>';
- var tabs=[['geral','Visão geral'],['pedidos','Meus pedidos'],['dados','Meus dados'],['enderecos','Meus endereços'],['seguranca','Segurança']];
+ var tabs=[['geral','Visão geral'],['pedidos','Meus pedidos'],['dados','Meus dados'],['enderecos','Meus endereços'],['seguranca','Segurança'],['privacidade','Privacidade']];
  $('#nav').innerHTML=tabs.map(function(t){return '<button data-t="'+t[0]+'" class="'+(t[0]===tab?'on':'')+'">'+t[1]+'</button>'}).join('');
  $('#nav').onclick=function(e){var b=e.target.closest('button');if(b){tab=b.dataset.t;shell();render()}};
  $('#out').onclick=async function(){await sb.auth.signOut();user=null;viewLogin()}
 }
 async function render(){var p=$('#pane');p.innerHTML='<p class="muted">Carregando…</p>';
- try{await({geral:vGeral,pedidos:vPedidos,dados:vDados,enderecos:vEnd,seguranca:vSeg})[tab](p)}catch(e){p.innerHTML='<p class="msg err">Não foi possível carregar. Atualize a página.</p>'}}
+ try{await({geral:vGeral,pedidos:vPedidos,dados:vDados,enderecos:vEnd,seguranca:vSeg,privacidade:vPriv})[tab](p)}catch(e){p.innerHTML='<p class="msg err">Não foi possível carregar. Atualize a página.</p>'}}
 
 async function loadOrders(limit){
  var r=await sb.from('orders').select('id,number,status,payment_status,total_cents,tracking_code,created_at,order_items(product_name,quantity)').order('created_at',{ascending:false}).limit(limit||100);
@@ -226,6 +232,31 @@ async function vSeg(p){
   if(!pwOk(f.pw.value))return msg(m,'A senha precisa de 8+ caracteres, com letras e números.');if(f.pw.value!==f.pw2.value)return msg(m,'As senhas não conferem.');
   var r=await sb.auth.updateUser({password:f.pw.value});if(r.error)return msg(m,traduz(r.error));f.reset();msg(m,'Senha alterada com sucesso.',true)};
  $('#all').onclick=async function(){await sb.auth.signOut({scope:'global'});user=null;viewLogin()}}
+
+/* ---------------- Privacidade ---------------- */
+async function vPriv(p){
+ var r=await sb.rpc('my_marketing');if(r.error)throw r.error;var d=r.data||{},cp=d.coupon;
+ var tk={};try{tk=await KBAPI.tokens()}catch(e){}
+ var st=!cp?'':cp.used?'<span class="tag">Já utilizado</span>':!cp.active?'<span class="tag err">Indisponível</span>':'<span class="tag ok">Disponível</span>';
+ p.innerHTML='<h2 class="serif">Privacidade</h2>'+
+ '<div class="card"><h3 class="serif">Comunicações por e-mail</h3><p class="muted" style="margin:6px 0 16px">Novidades, lançamentos e ofertas da Korboly. Você pode mudar quando quiser.</p>'+
+ '<label class="switch" style="display:flex;align-items:flex-start;gap:14px;cursor:pointer"><span class="kbc-sw" style="flex:none"><input type="checkbox" id="mk"'+(d.subscribed?' checked':'')+'><i aria-hidden="true"></i></span><span>Quero receber novidades e ofertas da Korboly em <b>'+esc(user.email)+'</b>.</span></label><p class="msg" id="mm" role="status"></p></div>'+
+ '<div class="card"><h3 class="serif">Cupom de primeira compra</h3>'+(cp?
+   '<div class="kv"><b class="lbl" style="font-size:15px;letter-spacing:.14em">'+esc(cp.code)+'</b>'+st+'</div><p class="muted" style="margin:12px 0 0;font-size:14px">'+esc(cp.percent)+'% de desconto na primeira compra feita com este e-mail. Uso único'+(cp.expires_at?', válido até '+dt(cp.expires_at):'')+'.</p>':
+   '<p class="muted" style="margin:6px 0 16px">Você ainda não tem um cupom de primeira compra.</p><button class="btn sm" id="cw">Gerar meu cupom</button><p class="msg" id="cm" role="status"></p>')+'</div>'+
+ '<div class="card"><h3 class="serif">Seus dados</h3><p class="muted" style="margin:6px 0 16px">Você pode corrigir seus dados em <b>Meus dados</b>. Para pedir uma cópia ou a exclusão dos seus dados, '+(tk.email?'escreva para <a href="mailto:'+esc(tk.email)+'" style="border-bottom:1px solid var(--line2)">'+esc(tk.email)+'</a>':'fale com a gente pelos canais de atendimento')+'. Respondemos em até 15 dias.</p>'+
+ '<div class="kv"><a class="btn sm" href="privacidade.html">Política de Privacidade</a><button class="btn sm" type="button" data-cookie-prefs>Preferências de cookies</button></div></div>';
+ var mk=p.querySelector('#mk');
+ mk.onchange=async function(){var on=mk.checked,m=p.querySelector('#mm');mk.disabled=true;
+  var x=await sb.rpc('set_my_marketing',{p_on:on});mk.disabled=false;
+  if(x.error){mk.checked=!on;return msg(m,'Não foi possível salvar agora. Tente de novo.')}
+  msg(m,on?'Pronto: você vai receber nossas novidades.':'Pronto: você não vai mais receber e-mails de ofertas.',true)};
+ var cw=p.querySelector('#cw');
+ if(cw)cw.onclick=async function(){var m=p.querySelector('#cm');cw.disabled=true;
+  var x=await sb.rpc('claim_welcome_coupon',{p_email:user.email,p_marketing:false});
+  if(x.error){cw.disabled=false;return msg(m,(x.error.code==='P0001'||x.error.code==='22023')?x.error.message:'Não foi possível gerar o cupom agora.')}
+  try{localStorage.setItem('kb_welcome',JSON.stringify({s:'subscribed',at:Date.now()}))}catch(e){}
+  render()}}
 
 /* ---------------- Início ---------------- */
 async function boot(){

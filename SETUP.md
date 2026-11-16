@@ -37,8 +37,21 @@ where id = (select id from auth.users where email = 'SEU-EMAIL@exemplo.com');
 ## 6. Publicar
 Coloque os arquivos na pasta do site e rode `enviar.bat` (ou `git add .`, `git commit`, `git push`).
 
+## 7. Cookies, FAQ, Privacidade e cupom de primeira compra
+1. No Supabase, **SQL Editor** → **New query**. Abra `supabase/002_privacidade_faq_boasvindas.sql`, copie tudo, cole e clique em **Run**. Pode rodar de novo sem problema (não apaga nada).
+2. No painel (`/admin`) → **Privacidade**: preencha razão social, CNPJ, endereço, encarregado e e-mail de contato. Enquanto estiverem vazios, aparecem como "[a preencher]" na política e no FAQ.
+3. Painel → **FAQ**: complete e publique as 6 perguntas em rascunho (as que têm textos entre colchetes).
+4. Painel → **Marketing**: ajuste o tempo do pop-up, o desconto e a validade.
+
+Como administrar:
+- **Marketing**: contatos captados, quem aceita ofertas, exportar CSV (use "Exportar para campanhas": só quem consentiu), descadastrar, excluir dados a pedido, cupons (criar, desativar, excluir).
+- **FAQ**: criar/editar/ordenar perguntas e categorias; rascunho não aparece no site.
+- **Privacidade**: dados do controlador e texto da política (cada alteração gera nova versão). "Pedir novo consentimento" mostra o aviso de cookies de novo para todos.
+- Se um dia instalar Google Analytics, Meta Pixel etc., coloque o script com `type="text/plain" data-consent="analytics"` (ou `"marketing"`): ele só roda depois que a pessoa aceitar.
+
 ## Onde cada coisa fica
-- Site: `index.html` · Conta do cliente: `conta.html` · Painel: `admin/index.html`
+- Site: `index.html` · Conta do cliente: `conta.html` · Painel: `admin/index.html` · FAQ: `faq.html` · Política: `privacidade.html`
+- Aviso de cookies: `js/consent.js` · Pop-up de primeira compra: `js/welcome.js`
 - Segurança: `supabase/schema.sql` (regras RLS, funções, bloqueio de admin)
 - Variáveis: só em `js/config.js` (URL + chave anon, ambas públicas por desenho). Senhas e chaves secretas **nunca** vão para o GitHub.
 

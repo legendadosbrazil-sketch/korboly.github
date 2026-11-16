@@ -47,6 +47,8 @@ h1.serif{font-size:36px;margin:0 0 28px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.thumbs div{position:relative}.thumbs img{width:64px;height:80px;object-fit:cover;border:1px solid var(--line)}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--err);color:var(--paper);font-size:12px;line-height:20px}
 .denied{max-width:480px;margin:20vh auto;text-align:center;padding:0 24px}
+.prose{font-size:15px;line-height:1.7}.prose h2{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:26px;margin:28px 0 10px}.prose ul{padding-left:18px}.prose a{border-bottom:1px solid var(--line2)}
+.faq-a p{margin:0 0 10px}.faq-a a{border-bottom:1px solid var(--line2)}.faq-a ul{padding-left:18px;margin:0 0 10px}.kb-tbd{background:rgba(166,79,39,.12);color:#8A3F1E;padding:0 4px}
 </style>
 </head>
 <body>
@@ -55,7 +57,7 @@ h1.serif{font-size:36px;margin:0 0 28px}
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script src="../js/config.js"></script><script src="../js/sb.js"></script>
+<script src="../js/config.js"></script><script src="../js/sb.js"></script><script src="../js/md.js"></script>
 <script>
 (function(){
 var root=document.getElementById('root'),modal=document.getElementById('modal'),mbox=document.getElementById('mbox'),toastEl=document.getElementById('toast'),tt;
@@ -74,8 +76,9 @@ if(!window.KB_READY||!window.sb){denied('Em configuração','Preencha <code>js/c
 
 var ic={dash:'<svg viewBox="0 0 16 16"><rect x="1.5" y="1.5" width="5" height="6"/><rect x="9.5" y="1.5" width="5" height="3.5"/><rect x="9.5" y="8" width="5" height="6.5"/><rect x="1.5" y="10.5" width="5" height="4"/></svg>',
  prod:'<svg viewBox="0 0 16 16"><path d="M5 1.5h6v3H5zM3.5 4.5h9v10h-9z"/></svg>',ped:'<svg viewBox="0 0 16 16"><path d="M1.5 3h2l1.5 8h7.5l1.5-6H4.2"/><circle cx="6" cy="13.5" r="1"/><circle cx="11.5" cy="13.5" r="1"/></svg>',
- cli:'<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14.5c.5-3 3-4.5 6-4.5s5.500 1.500 6 4.500"/></svg>',con:'<svg viewBox="0 0 16 16"><path d="M2 3h12M2 7h12M2 11h8"/></svg>'};
-var TABS=[['dash','Dashboard'],['prod','Produtos'],['ped','Pedidos'],['cli','Clientes'],['con','Conteúdo']];
+ cli:'<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14.5c.5-3 3-4.5 6-4.5s5.500 1.500 6 4.500"/></svg>',con:'<svg viewBox="0 0 16 16"><path d="M2 3h12M2 7h12M2 11h8"/></svg>',
+ mkt:'<svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="10"/><path d="M1.5 3.5L8 9l6.5-5.5"/></svg>',faq:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.6"/><circle cx="8" cy="11.6" r=".3"/></svg>',priv:'<svg viewBox="0 0 16 16"><path d="M8 1.5l5.5 2v4.200c0 3.300-2.300 5.800-5.500 6.800C4.800 13.500 2.500 11 2.500 7.700V3.500z"/><path d="M5.800 8l1.600 1.600L10.400 6.500"/></svg>'};
+var TABS=[['dash','Dashboard'],['prod','Produtos'],['ped','Pedidos'],['cli','Clientes'],['mkt','Marketing'],['faq','FAQ'],['priv','Privacidade'],['con','Conteúdo']];
 var cur='dash',me=null;
 
 function layout(){
@@ -85,7 +88,7 @@ function layout(){
  $('#nav').onclick=function(e){var b=e.target.closest('button');if(b){cur=b.dataset.t;go();$('#sb').classList.remove('on')}};
  $('#mb').onclick=function(){$('#sb').classList.toggle('on')};go()}
 function go(){[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.dataset.t===cur)});
- var c=$('#cont');c.innerHTML='<p class="muted">Carregando…</p>';({dash:vDash,prod:vProd,ped:vPed,cli:vCli,con:vCon})[cur](c).catch(function(e){err(e,'Erro ao carregar.');c.innerHTML='<p class="msg err">Não foi possível carregar esta seção.</p>'})}
+ var c=$('#cont');c.innerHTML='<p class="muted">Carregando…</p>';({dash:vDash,prod:vProd,ped:vPed,cli:vCli,mkt:vMkt,faq:vFaq,priv:vPrivA,con:vCon})[cur](c).catch(function(e){err(e,'Erro ao carregar.');c.innerHTML='<p class="msg err">Não foi possível carregar esta seção.</p>'})}
 
 /* ---------- Dashboard ---------- */
 async function vDash(c){
@@ -179,23 +182,21 @@ async function vCli(c){var r=await sb.rpc('admin_customers');if(r.error)throw r.
   ((o.data&&o.data.length)?'<table><tbody>'+o.data.map(function(y){return '<tr><td>#'+y.number+'</td><td>'+dt(y.created_at)+'</td><td>'+brl(y.total_cents)+'</td><td>'+PAY[y.payment_status]+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Sem pedidos.</p>')+'<br><button class="btn sm" id="cx">Fechar</button>');$('#cx').onclick=closeM}}
 
 /* ---------- Conteúdo ---------- */
-var TEXTS=[['hero_title','Título da página inicial'],['about','Texto institucional (Sobre)'],['shipping_note','Aviso de entrega / frete'],['contact_email','E-mail de contato'],['whatsapp','WhatsApp (somente números com DDD)']];
+var TEXTS=[['hero_title','Título da página inicial'],['about','Texto institucional (Sobre)'],['shipping_note','Aviso de entrega / frete'],['whatsapp','WhatsApp (somente números com DDD)']];
 async function vCon(c){
- var r=await Promise.all([sb.from('banners').select('*').order('position'),sb.from('coupons').select('*').order('code'),sb.from('site_content').select('*')]);
- var B=r[0].data||[],K=r[1].data||[],S={};(r[2].data||[]).forEach(function(x){S[x.key]=x.value});
+ var r=await Promise.all([sb.from('banners').select('*').order('position'),sb.from('site_content').select('*')]);
+ if(r[0].error)throw r[0].error;
+ var B=r[0].data||[],S={};(r[1].data||[]).forEach(function(x){S[x.key]=x.value});
  c.innerHTML='<h1 class="serif">Conteúdo</h1>'+
- '<div class="panel sec"><h3 class="lbl muted">Textos e informações institucionais</h3><form id="tf">'+TEXTS.map(function(t){return '<label class="fld"><span class="lbl">'+t[1]+'</span>'+(t[0]==='about'?'<textarea name="'+t[0]+'" maxlength="2000">'+esc(S[t[0]]||'')+'</textarea>':'<input name="'+t[0]+'" maxlength="200" value="'+esc(S[t[0]]||'')+'">')+'</label>'}).join('')+'<p class="msg" id="tm"></p><button class="btn solid sm">Salvar textos</button></form></div>'+
- '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 class="lbl muted" style="margin:0">Banners da página inicial</h3><button class="btn sm" id="nb">Novo banner</button></div>'+(B.length?'<table><tbody>'+B.map(function(b){return '<tr><td><img class="pimg" style="width:90px;height:50px" src="'+esc(imgUrl(b.image_url))+'" alt=""></td><td>'+esc(b.title)+'<br><span class="muted" style="font-size:12px">'+esc(b.link_url||'')+'</span></td><td><span class="tag '+(b.active?'ok':'err')+'">'+(b.active?'Ativo':'Inativo')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-be="'+b.id+'">Editar</button> <button class="btn sm danger" data-bd="'+b.id+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum banner. O site usa o banner padrão.</p>')+'</div>'+
- '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 class="lbl muted" style="margin:0">Ofertas e cupons</h3><button class="btn sm" id="nk">Novo cupom</button></div>'+(K.length?'<table><thead><tr><th>Código</th><th>Desconto</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody>'+K.map(function(k){return '<tr><td><b>'+esc(k.code)+'</b></td><td>'+(k.kind==='percent'?k.value+'%':brl(k.value))+'</td><td>'+k.used+(k.max_uses?' / '+k.max_uses:'')+'</td><td>'+(k.expires_at?dt(k.expires_at):'—')+'</td><td><span class="tag '+(k.active?'ok':'err')+'">'+(k.active?'Ativo':'Inativo')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-kt="'+k.code+'">'+(k.active?'Desativar':'Ativar')+'</button> <button class="btn sm danger" data-kd="'+k.code+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum cupom.</p>')+'</div>';
+ '<div class="panel sec"><h3 class="lbl muted">Textos e informações institucionais</h3><form id="tf">'+TEXTS.map(function(t){return '<label class="fld"><span class="lbl">'+t[1]+'</span>'+(t[0]==='about'?'<textarea name="'+t[0]+'" maxlength="2000">'+esc(S[t[0]]||'')+'</textarea>':'<input name="'+t[0]+'" maxlength="200" value="'+esc(S[t[0]]||'')+'">')+'</label>'}).join('')+'<p class="muted" style="font-size:13px;margin:-4px 0 16px">E-mail de contato e dados da empresa ficam em <b>Privacidade</b>. Cupons ficam em <b>Marketing</b>.</p><p class="msg" id="tm"></p><button class="btn solid sm">Salvar textos</button></form></div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 class="lbl muted" style="margin:0">Banners da página inicial</h3><button class="btn sm" id="nb">Novo banner</button></div>'+(B.length?'<table><tbody>'+B.map(function(b){return '<tr><td><img class="pimg" style="width:90px;height:50px" src="'+esc(imgUrl(b.image_url))+'" alt=""></td><td>'+esc(b.title)+'<br><span class="muted" style="font-size:12px">'+esc(b.link_url||'')+'</span></td><td><span class="tag '+(b.active?'ok':'err')+'">'+(b.active?'Ativo':'Inativo')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-be="'+b.id+'">Editar</button> <button class="btn sm danger" data-bd="'+b.id+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum banner. O site usa o banner padrão.</p>')+'</div>';
  $('#tf').onsubmit=async function(e){e.preventDefault();var f=e.target,rows=TEXTS.map(function(t){return {key:t[0],value:f[t[0]].value.trim(),updated_at:new Date().toISOString()}});
+  if(rows[3].value&&!/^\d{10,13}$/.test(rows[3].value))return msg($('#tm'),'WhatsApp: use só números, com DDD (ex.: 11999990000).');
   var u=await sb.from('site_content').upsert(rows);if(u.error)return msg($('#tm'),'Não foi possível salvar.');msg($('#tm'),'Textos salvos.',true)};
  $('#nb').onclick=function(){fBan(null,B.length)};
- $('#nk').onclick=fCup;
  c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
   if(d.be)fBan(B.find(function(x){return x.id===d.be}),B.length);
-  if(d.bd&&confirm('Excluir banner?')){var x=await sb.from('banners').delete().eq('id',d.bd);if(x.error)err(x.error);else go()}
-  if(d.kt){var k=K.find(function(z){return z.code===d.kt}),x=await sb.from('coupons').update({active:!k.active}).eq('code',d.kt);if(x.error)err(x.error);else go()}
-  if(d.kd&&confirm('Excluir cupom?')){var y=await sb.from('coupons').delete().eq('code',d.kd);if(y.error)err(y.error);else go()}}}
+  if(d.bd&&confirm('Excluir banner?')){var x=await sb.from('banners').delete().eq('id',d.bd);if(x.error)err(x.error);else go()}}}
 function fBan(b,n){b=b||{};var img=b.image_url||'';
  openM('<h2 class="serif" style="margin:0 0 20px">'+(b.id?'Editar banner':'Novo banner')+'</h2><form id="bf"><label class="fld"><span class="lbl">Título</span><input name="t" maxlength="80" value="'+esc(b.title||'')+'" required></label><label class="fld"><span class="lbl">Link ao clicar</span><input name="l" maxlength="300" value="'+esc(b.link_url||'')+'"></label>'+
  '<div id="bi" class="thumbs"></div><input type="file" id="bu" accept="image/jpeg,image/png,image/webp" style="margin-bottom:16px"><label class="switch" style="margin-bottom:16px"><input type="checkbox" name="a"'+(b.active!==false?' checked':'')+'><span class="lbl">Ativo</span></label><p class="msg" id="bm"></p><div style="display:flex;gap:10px"><button class="btn solid">Salvar</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
@@ -205,11 +206,167 @@ function fBan(b,n){b=b||{};var img=b.image_url||'';
  $('#bf').onsubmit=async function(e){e.preventDefault();var f=e.target,l=f.l.value.trim();if(!img)return msg($('#bm'),'Envie a imagem do banner.');if(l&&!/^(https?:\/\/|\/|#)/.test(l))return msg($('#bm'),'Link inválido.');
   var row={title:f.t.value.trim(),link_url:l||null,image_url:img,active:f.a.checked},r=b.id?await sb.from('banners').update(row).eq('id',b.id):await sb.from('banners').insert(Object.assign({position:n+1},row));
   if(r.error)return msg($('#bm'),'Não foi possível salvar.');closeM();toast('Banner salvo.');go()}}
-function fCup(){openM('<h2 class="serif" style="margin:0 0 20px">Novo cupom</h2><form id="kf"><label class="fld"><span class="lbl">Código</span><input name="c" maxlength="30" style="text-transform:uppercase" required></label><div class="row2"><label class="fld"><span class="lbl">Tipo</span><select name="k"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select></label><label class="fld"><span class="lbl">Valor</span><input name="v" inputmode="decimal" required></label></div><div class="row2"><label class="fld"><span class="lbl">Validade (opcional)</span><input name="e" type="date"></label><label class="fld"><span class="lbl">Limite de usos (opcional)</span><input name="m" inputmode="numeric"></label></div><p class="msg" id="km"></p><div style="display:flex;gap:10px"><button class="btn solid">Criar cupom</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
- $('#cx').onclick=closeM;$('#kf').onsubmit=async function(e){e.preventDefault();var f=e.target,code=f.c.value.trim().toUpperCase().replace(/\s/g,''),kind=f.k.value,v=kind==='percent'?parseInt(f.v.value,10):cents(f.v.value);
-  if(!/^[A-Z0-9_-]{3,30}$/.test(code))return msg($('#km'),'Código: 3 a 30 letras ou números.');if(!v||v<1||(kind==='percent'&&v>100))return msg($('#km'),'Valor inválido.');
-  var mx=f.m.value.trim()?parseInt(f.m.value,10):null,r=await sb.from('coupons').insert({code:code,kind:kind,value:v,expires_at:f.e.value?new Date(f.e.value+'T23:59:59').toISOString():null,max_uses:mx});
-  if(r.error)return msg($('#km'),'Não foi possível criar (o código já existe?).');closeM();toast('Cupom criado.');go()}}
+/* ---------- Marketing: pop-up, contatos e cupons ---------- */
+var ORIG={popup_boas_vindas:'Pop-up',minha_conta:'Minha conta'};
+function intIn(v,a,b){var n=Number(v);return Number.isInteger(n)&&n>=a&&n<=b?n:null}
+function csvCell(v){v=v==null?'':String(v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function download(name,rows){var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(';')}).join('\r\n'),a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function qClean(q){return q.replace(/[^\w@.+-]/g,'').slice(0,80)}
+
+async function vMkt(c){
+ var r=await Promise.all([sb.rpc('admin_marketing_stats'),sb.from('site_settings').select('*').eq('id',1).single()]);
+ if(r[0].error)throw r[0].error;if(r[1].error)throw r[1].error;
+ var S=r[0].data,P=r[1].data;
+ c.innerHTML='<h1 class="serif">Marketing</h1>'+
+ '<div class="stats">'+stat('Contatos captados',S.leads)+stat('Aceitam ofertas por e-mail',S.leads_consent)+stat('Cupons de boas-vindas',S.welcome_coupons)+stat('Cupons de boas-vindas usados',S.welcome_used)+'</div>'+
+ '<div class="panel sec"><h3 class="lbl muted">Pop-up de primeira compra</h3><form id="pf2" novalidate>'+
+ '<label class="switch" style="margin-bottom:20px"><input type="checkbox" name="en"'+(P.popup_enabled?' checked':'')+'><span class="lbl">Pop-up ativo no site</span></label>'+
+ '<div class="row2"><label class="fld"><span class="lbl">Aparece após (segundos de navegação)</span><input name="dl" type="number" min="3" max="120" step="1" value="'+P.popup_delay_seconds+'" required></label>'+
+ '<label class="fld"><span class="lbl">Se dispensado, volta após (dias)</span><input name="rd" type="number" min="1" max="365" step="1" value="'+P.popup_redisplay_days+'" required></label></div>'+
+ '<div class="row2"><label class="fld"><span class="lbl">Desconto do cupom (%)</span><input name="pc" type="number" min="1" max="50" step="1" value="'+P.welcome_discount_percent+'" required></label>'+
+ '<label class="fld"><span class="lbl">Validade do cupom em dias (vazio = sem validade)</span><input name="vd" type="number" min="1" max="365" step="1" value="'+(P.welcome_coupon_valid_days||'')+'"></label></div>'+
+ '<p class="muted" style="font-size:13px;margin:-4px 0 16px">Quem já se cadastrou nunca vê o pop-up de novo. Desconto e validade valem para os próximos cupons; os já emitidos não mudam.</p>'+
+ '<p class="msg" id="pm"></p><button class="btn solid sm">Salvar configurações</button></form></div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 class="lbl muted" style="margin:0">Contatos captados</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm solid" id="ex1">Exportar para campanhas</button><button class="btn sm" id="ex2">Exportar tudo</button></div></div>'+
+ '<p class="muted" style="font-size:13px;margin:0 0 16px">Envie campanhas somente para quem marcou a opção de receber ofertas (coluna “Ofertas por e-mail”). Os demais deixaram o e-mail apenas para receber o cupom. Pedidos de exclusão: use “Excluir dados”.</p>'+
+ '<div class="tools"><input id="lq" type="search" placeholder="Buscar e-mail" aria-label="Buscar e-mail"><select id="lf" aria-label="Filtrar contatos"><option value="all">Todos</option><option value="yes">Com consentimento</option><option value="no">Sem consentimento</option><option value="unsub">Descadastrados</option></select></div><div id="lt"><p class="muted">Carregando…</p></div></div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 class="lbl muted" style="margin:0">Cupons</h3><button class="btn sm" id="nk">Novo cupom</button></div>'+
+ '<div class="tools"><input id="cq" type="search" placeholder="Buscar código ou e-mail" aria-label="Buscar cupom"><select id="cf" aria-label="Filtrar cupons"><option value="all">Todos</option><option value="manual">Criados no painel</option><option value="boas_vindas">Boas-vindas</option></select></div><div id="ctb"><p class="muted">Carregando…</p></div></div>';
+
+ $('#pf2').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#pm');
+  var dl=intIn(f.dl.value,3,120),rd=intIn(f.rd.value,1,365),pc=intIn(f.pc.value,1,50),vd=f.vd.value.trim()===''?null:intIn(f.vd.value,1,365);
+  if(dl===null)return msg(m,'Tempo para aparecer: de 3 a 120 segundos.');if(rd===null)return msg(m,'Reaparecer: de 1 a 365 dias.');
+  if(pc===null)return msg(m,'Desconto: de 1% a 50%.');if(f.vd.value.trim()!==''&&vd===null)return msg(m,'Validade: de 1 a 365 dias, ou deixe vazio.');
+  var u=await sb.from('site_settings').update({popup_enabled:f.en.checked,popup_delay_seconds:dl,popup_redisplay_days:rd,welcome_discount_percent:pc,welcome_coupon_valid_days:vd}).eq('id',1);
+  if(u.error)return msg(m,'Não foi possível salvar.');msg(m,'Configurações salvas. Já valem para os próximos visitantes.',true)};
+
+ async function leads(){var q=qClean($('#lq').value.trim()),f=$('#lf').value,x=sb.from('leads').select('*').order('created_at',{ascending:false}).limit(500);
+  if(q)x=x.ilike('email','%'+q+'%');if(f==='yes')x=x.eq('marketing_consent',true);if(f==='no')x=x.eq('marketing_consent',false).is('unsubscribed_at',null);if(f==='unsub')x=x.eq('marketing_consent',false).not('unsubscribed_at','is',null);
+  var d=await x;if(d.error)return err(d.error);var L=d.data;
+  $('#lt').innerHTML=L.length?'<table><thead><tr><th>E-mail</th><th>Origem</th><th>Cadastro</th><th>Ofertas por e-mail</th><th></th></tr></thead><tbody>'+L.map(function(l){
+   var st=l.marketing_consent?'<span class="tag ok">Sim · '+dt(l.marketing_consent_at)+'</span>':l.unsubscribed_at?'<span class="tag err">Descadastrado · '+dt(l.unsubscribed_at)+'</span>':'<span class="tag">Não</span>';
+   return '<tr><td>'+esc(l.email)+'</td><td>'+esc(ORIG[l.source]||l.source)+'</td><td>'+dt(l.created_at)+'</td><td>'+st+'</td><td style="white-space:nowrap">'+(l.marketing_consent?'<button class="btn sm" data-lu="'+l.id+'">Descadastrar</button> ':'')+'<button class="btn sm danger" data-ld="'+l.id+'">Excluir dados</button></td></tr>'}).join('')+'</tbody></table>'+(L.length===500?'<p class="muted" style="font-size:13px">Mostrando os 500 mais recentes. Use a busca para encontrar outros.</p>':''):'<p class="muted">Nenhum contato encontrado.</p>'}
+ async function coupons(){var q=qClean($('#cq').value.trim()).toLowerCase(),f=$('#cf').value,x=sb.from('coupons').select('*').order('created_at',{ascending:false}).limit(300);
+  if(q)x=x.or('code.ilike.%'+q+'%,email.ilike.%'+q+'%');if(f!=='all')x=x.eq('origin',f);
+  var d=await x;if(d.error)return err(d.error);var K=d.data,now=Date.now();
+  $('#ctb').innerHTML=K.length?'<table><thead><tr><th>Código</th><th>Origem</th><th>Desconto</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody>'+K.map(function(k){
+   var exp=k.expires_at&&new Date(k.expires_at).getTime()<now,full=k.max_uses&&k.used>=k.max_uses;
+   var st=!k.active?'<span class="tag err">Inativo</span>':exp?'<span class="tag err">Expirado</span>':full?'<span class="tag">Usado</span>':'<span class="tag ok">Ativo</span>';
+   return '<tr><td><b>'+esc(k.code)+'</b>'+(k.email?'<br><span class="muted" style="font-size:12px">'+esc(k.email)+'</span>':'')+'</td><td>'+(k.origin==='boas_vindas'?'Boas-vindas':'Painel')+(k.first_purchase_only?'<br><span class="muted" style="font-size:12px">1ª compra</span>':'')+'</td><td>'+(k.kind==='percent'?k.value+'%':brl(k.value))+'</td><td>'+k.used+(k.max_uses?' / '+k.max_uses:'')+'</td><td>'+(k.expires_at?dt(k.expires_at):'—')+'</td><td>'+st+'</td><td style="white-space:nowrap"><button class="btn sm" data-kt="'+esc(k.code)+'" data-ka="'+(k.active?1:0)+'">'+(k.active?'Desativar':'Ativar')+'</button> <button class="btn sm danger" data-kd="'+esc(k.code)+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>'+(K.length===300?'<p class="muted" style="font-size:13px">Mostrando os 300 mais recentes. Use a busca para encontrar outros.</p>':''):'<p class="muted">Nenhum cupom encontrado.</p>'}
+ var t1,t2;$('#lq').oninput=function(){clearTimeout(t1);t1=setTimeout(leads,250)};$('#lf').onchange=leads;
+ $('#cq').oninput=function(){clearTimeout(t2);t2=setTimeout(coupons,250)};$('#cf').onchange=coupons;
+ $('#nk').onclick=function(){fCup(coupons)};
+ async function exportar(onlyConsent){var x=sb.from('leads').select('email,marketing_consent,marketing_consent_at,source,created_at,unsubscribed_at').order('created_at',{ascending:false}).limit(10000);
+  if(onlyConsent)x=x.eq('marketing_consent',true);var d=await x;if(d.error)return err(d.error);
+  if(!d.data.length)return toast(onlyConsent?'Nenhum contato com consentimento ainda.':'Nenhum contato ainda.',1);
+  var rows=[['email','aceita_ofertas','data_consentimento','origem','cadastro','descadastro']].concat(d.data.map(function(l){return [l.email,l.marketing_consent?'sim':'nao',l.marketing_consent_at?new Date(l.marketing_consent_at).toLocaleString('pt-BR'):'',ORIG[l.source]||l.source,new Date(l.created_at).toLocaleString('pt-BR'),l.unsubscribed_at?new Date(l.unsubscribed_at).toLocaleString('pt-BR'):'']}));
+  download('korboly-contatos'+(onlyConsent?'-campanhas':'')+'-'+new Date().toISOString().slice(0,10)+'.csv',rows);toast(d.data.length+' contato(s) exportado(s).')}
+ $('#ex1').onclick=function(){exportar(true)};$('#ex2').onclick=function(){exportar(false)};
+ c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.lu&&confirm('Descadastrar este contato das campanhas? O cupom dele continua válido.')){var x=await sb.from('leads').update({marketing_consent:false,unsubscribed_at:new Date().toISOString()}).eq('id',d.lu);if(x.error)err(x.error);else{toast('Contato descadastrado.');leads()}}
+  if(d.ld&&confirm('Excluir os dados deste contato? O e-mail e o cupom de boas-vindas ainda não usado serão apagados. Esta ação não pode ser desfeita.')){var y=await sb.rpc('admin_delete_lead',{p_id:d.ld});if(y.error)err(y.error);else{toast('Dados excluídos.');leads();coupons()}}
+  if(d.kt){var z=await sb.from('coupons').update({active:d.ka!=='1'}).eq('code',d.kt);if(z.error)err(z.error);else coupons()}
+  if(d.kd&&confirm('Excluir o cupom '+d.kd+'? Pedidos que já usaram este cupom não são afetados.')){var w=await sb.from('coupons').delete().eq('code',d.kd);if(w.error)err(w.error);else{toast('Cupom excluído.');coupons()}}};
+ leads();coupons()}
+
+function fCup(after){openM('<h2 class="serif" style="margin:0 0 20px">Novo cupom</h2><form id="kf" novalidate><label class="fld"><span class="lbl">Código</span><input name="c" maxlength="30" style="text-transform:uppercase" required></label><div class="row2"><label class="fld"><span class="lbl">Tipo</span><select name="k"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select></label><label class="fld"><span class="lbl">Valor</span><input name="v" inputmode="decimal" required></label></div><div class="row2"><label class="fld"><span class="lbl">Validade (opcional)</span><input name="e" type="date"></label><label class="fld"><span class="lbl">Limite de usos (opcional)</span><input name="m" inputmode="numeric"></label></div>'+
+ '<label class="fld"><span class="lbl">Restringir a um e-mail (opcional)</span><input name="em" type="email" maxlength="254" placeholder="cliente@email.com"></label>'+
+ '<label class="switch" style="margin-bottom:18px"><input type="checkbox" name="fp"><span class="lbl">Válido somente na primeira compra</span></label>'+
+ '<p class="msg" id="km"></p><div style="display:flex;gap:10px"><button class="btn solid">Criar cupom</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
+ $('#cx').onclick=closeM;$('#kf').onsubmit=async function(e){e.preventDefault();var f=e.target,code=f.c.value.trim().toUpperCase().replace(/\s/g,''),kind=f.k.value,v=kind==='percent'?parseInt(f.v.value,10):cents(f.v.value),em=f.em.value.trim().toLowerCase();
+  if(!/^[A-Z0-9_-]{3,30}$/.test(code))return msg($('#km'),'Código: 3 a 30 caracteres (letras, números, - ou _).');if(!v||v<1||(kind==='percent'&&v>100))return msg($('#km'),'Valor inválido.');
+  var mx=f.m.value.trim()?parseInt(f.m.value,10):null;if(f.m.value.trim()&&(!mx||mx<1))return msg($('#km'),'Limite de usos inválido.');
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em))return msg($('#km'),'E-mail inválido.');
+  var r=await sb.from('coupons').insert({code:code,kind:kind,value:v,expires_at:f.e.value?new Date(f.e.value+'T23:59:59').toISOString():null,max_uses:mx,email:em||null,first_purchase_only:f.fp.checked,origin:'manual'});
+  if(r.error)return msg($('#km'),r.error.code==='23505'?'Já existe um cupom com este código.':'Não foi possível criar o cupom.');closeM();toast('Cupom criado.');if(after)after();else go()}}
+
+/* ---------- FAQ ---------- */
+var FAQ_HINT='Formatação: **negrito**, [texto do link](https://...) e listas com “- ”. Variáveis: {{email}}, {{whatsapp}}, {{empresa}}.';
+var TOK=null;async function tokens(){if(TOK)return TOK;var r=await sb.from('site_content').select('key,value');var m={},map={contact_email:'email',whatsapp:'whatsapp',company_name:'empresa',company_cnpj:'cnpj',company_address:'endereco',dpo_name:'encarregado'};(r.data||[]).forEach(function(x){if(map[x.key])m[map[x.key]]=(x.value||'').trim()});return TOK=m}
+function hasPlaceholder(t){return /\[[^\]\n]{3,}\](?!\()/.test(t)}
+async function vFaq(c){
+ var r=await Promise.all([sb.from('faq_categories').select('*').order('position').order('name'),sb.from('faq_items').select('*').order('position').order('updated_at')]);
+ if(r[0].error)throw r[0].error;if(r[1].error)throw r[1].error;
+ var C=r[0].data,I=r[1].data,drafts=I.filter(function(i){return !i.published}).length;
+ c.innerHTML='<h1 class="serif">Perguntas frequentes</h1><div class="tools"><button class="btn solid sm" id="nq">Nova pergunta</button><button class="btn sm" id="fc">Categorias</button><a class="btn sm" href="../faq.html" target="_blank" rel="noopener">Ver a página</a></div>'+
+ (drafts?'<p class="msg" style="color:var(--accent)">'+drafts+(drafts>1?' perguntas estão em rascunho e não aparecem':' pergunta está em rascunho e não aparece')+' no site. Complete o texto entre colchetes e marque como publicada.</p>':'')+
+ (C.length?C.map(function(cat){var its=I.filter(function(i){return i.category_id===cat.id});
+  return '<div class="panel sec"><h3 class="lbl muted">'+esc(cat.name)+'</h3>'+(its.length?'<table><thead><tr><th style="width:56px">Ordem</th><th>Pergunta</th><th>Status</th><th></th></tr></thead><tbody>'+its.map(function(i){return '<tr><td>'+i.position+'</td><td>'+esc(i.question)+'</td><td><span class="tag '+(i.published?'ok':'')+'">'+(i.published?'Publicada':'Rascunho')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-qe="'+i.id+'">Editar</button> <button class="btn sm danger" data-qd="'+i.id+'">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhuma pergunta nesta categoria.</p>')+'</div>'}).join(''):'<p class="muted">Crie uma categoria para começar.</p>');
+ $('#nq').onclick=function(){if(!C.length)return toast('Crie uma categoria primeiro.',1);fFaq(null,C,I)};$('#fc').onclick=function(){fFaqCats(C,I)};
+ c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.qe)fFaq(I.find(function(x){return x.id===d.qe}),C,I);
+  if(d.qd&&confirm('Excluir esta pergunta?')){var x=await sb.from('faq_items').delete().eq('id',d.qd);if(x.error)err(x.error);else{toast('Pergunta excluída.');go()}}}}
+async function fFaq(it,C,I){it=it||{};var tk=await tokens();
+ var nextPos=it.id?it.position:(I.filter(function(i){return i.category_id===(it.category_id||C[0].id)}).reduce(function(a,i){return Math.max(a,i.position)},0)+1);
+ openM('<h2 class="serif" style="margin:0 0 20px">'+(it.id?'Editar pergunta':'Nova pergunta')+'</h2><form id="qf" novalidate>'+
+ '<div class="row2"><label class="fld"><span class="lbl">Categoria</span><select name="cat">'+C.map(function(c){return '<option value="'+c.id+'"'+(c.id===it.category_id?' selected':'')+'>'+esc(c.name)+'</option>'}).join('')+'</select></label>'+
+ '<label class="fld"><span class="lbl">Ordem na categoria</span><input name="pos" type="number" min="0" max="999" value="'+nextPos+'"></label></div>'+
+ '<label class="fld"><span class="lbl">Pergunta</span><input name="q" maxlength="200" value="'+esc(it.question||'')+'" required></label>'+
+ '<label class="fld"><span class="lbl">Resposta</span><textarea name="a" maxlength="4000" rows="7" required>'+esc(it.answer||'')+'</textarea></label>'+
+ '<p class="muted" style="font-size:12.5px;margin:-8px 0 14px">'+FAQ_HINT+'</p>'+
+ '<div class="lbl muted" style="margin-bottom:8px">Pré-visualização</div><div id="qp" class="faq-a" style="border:1px solid var(--line);padding:14px 16px;margin-bottom:18px;max-width:none;color:var(--muted)"></div>'+
+ '<label class="switch" style="margin-bottom:18px"><input type="checkbox" name="pub"'+(it.id?(it.published?' checked':''):' checked')+'><span class="lbl">Publicada no site</span></label>'+
+ '<p class="msg" id="qm"></p><div style="display:flex;gap:10px"><button class="btn solid">Salvar</button><button type="button" class="btn" id="cx">Cancelar</button></div></form>');
+ var f=$('#qf');function pv(){$('#qp').innerHTML=f.a.value.trim()?kbmd(f.a.value,tk):'<span class="muted">A resposta aparece aqui.</span>'}pv();f.a.oninput=pv;$('#cx').onclick=closeM;
+ f.onsubmit=async function(e){e.preventDefault();var m=$('#qm'),q=f.q.value.trim(),a=f.a.value.trim(),pos=intIn(f.pos.value,0,999);
+  if(q.length<5)return msg(m,'A pergunta precisa ter pelo menos 5 caracteres.');if(a.length<2)return msg(m,'Escreva a resposta.');if(pos===null)return msg(m,'Ordem: de 0 a 999.');
+  if(f.pub.checked&&hasPlaceholder(a)&&!confirm('A resposta ainda tem um texto entre colchetes, como “[informe…]”. Publicar mesmo assim?'))return;
+  var row={category_id:f.cat.value,question:q,answer:a,position:pos,published:f.pub.checked};
+  var r=it.id?await sb.from('faq_items').update(row).eq('id',it.id):await sb.from('faq_items').insert(row);
+  if(r.error)return msg(m,'Não foi possível salvar.');closeM();toast('Pergunta salva.');go()}}
+function fFaqCats(C,I){
+ function rowH(c){var n=I.filter(function(i){return i.category_id===c.id}).length;return '<div class="tools" data-id="'+c.id+'" style="margin-bottom:10px"><input value="'+esc(c.name)+'" maxlength="60" aria-label="Nome da categoria" data-f="n"><input type="number" min="0" max="999" value="'+c.position+'" aria-label="Ordem" data-f="p" style="flex:0 0 80px"><button class="btn sm" data-cs="'+c.id+'">Salvar</button><button class="btn sm danger" data-cd="'+c.id+'"'+(n?' disabled title="Mova ou exclua as '+n+' pergunta(s) antes"':'')+'>Excluir</button></div>'}
+ openM('<h2 class="serif" style="margin:0 0 20px">Categorias do FAQ</h2><div id="cl">'+C.map(rowH).join('')+'</div><form id="ncf" class="tools" style="margin-top:20px"><input name="n" maxlength="60" placeholder="Nova categoria" aria-label="Nova categoria" required><button class="btn sm solid">Adicionar</button></form><p class="msg" id="ncm"></p><button class="btn" id="cx">Fechar</button>');
+ $('#cx').onclick=function(){closeM();go()};
+ $('#cl').onclick=async function(e){var b=e.target.closest('button');if(!b||b.disabled)return;var w=b.closest('[data-id]'),m=$('#ncm');
+  if(b.dataset.cs){var n=w.querySelector('[data-f=n]').value.trim(),p=intIn(w.querySelector('[data-f=p]').value,0,999);if(n.length<2)return msg(m,'Nome: pelo menos 2 caracteres.');if(p===null)return msg(m,'Ordem: de 0 a 999.');
+   var r=await sb.from('faq_categories').update({name:n,position:p}).eq('id',b.dataset.cs);if(r.error)return msg(m,r.error.code==='23505'?'Já existe uma categoria com esse nome.':'Não foi possível salvar.');msg(m,'Categoria salva.',true)}
+  if(b.dataset.cd&&confirm('Excluir esta categoria?')){var x=await sb.from('faq_categories').delete().eq('id',b.dataset.cd);if(x.error)return msg(m,'Não foi possível excluir: a categoria ainda tem perguntas.');w.remove();msg(m,'Categoria excluída.',true)}};
+ $('#ncf').onsubmit=async function(e){e.preventDefault();var n=e.target.n.value.trim(),m=$('#ncm');if(n.length<2)return msg(m,'Nome: pelo menos 2 caracteres.');
+  var pos=C.reduce(function(a,c){return Math.max(a,c.position)},0)+1,r=await sb.from('faq_categories').insert({name:n,position:pos}).select().single();
+  if(r.error)return msg(m,r.error.code==='23505'?'Já existe uma categoria com esse nome.':'Não foi possível criar.');C.push(r.data);$('#cl').insertAdjacentHTML('beforeend',rowH(r.data));e.target.reset();msg(m,'Categoria criada.',true)}}
+
+/* ---------- Privacidade ---------- */
+var COMPANY=[['company_name','Razão social (controlador dos dados)','{{empresa}}'],['company_cnpj','CNPJ','{{cnpj}}'],['company_address','Endereço','{{endereco}}'],['dpo_name','Encarregado pelo tratamento de dados (nome)','{{encarregado}}'],['contact_email','E-mail de contato e privacidade','{{email}}']];
+function cnpjOk(v){var d=v.replace(/\D/g,'');if(d.length!==14||/^(\d)\1+$/.test(d))return false;function dv(n){var w=n===12?[5,4,3,2,9,8,7,6,5,4,3,2]:[6,5,4,3,2,9,8,7,6,5,4,3,2],s=0;for(var i=0;i<n;i++)s+=+d[i]*w[i];var r=s%11;return r<2?0:11-r}return dv(12)===+d[12]&&dv(13)===+d[13]}
+async function vPrivA(c){
+ var r=await Promise.all([sb.from('pages').select('*').eq('slug','privacidade').maybeSingle(),sb.from('site_content').select('*'),sb.from('site_settings').select('consent_version').eq('id',1).single(),sb.rpc('admin_marketing_stats')]);
+ for(var i=0;i<r.length;i++)if(r[i].error)throw r[i].error;
+ var Pg=r[0].data||{title:'Política de Privacidade',body:'',version:0},S={};(r[1].data||[]).forEach(function(x){S[x.key]=x.value});
+ var cv=r[2].data.consent_version,C30=r[3].data.consents_30d||{},empty=COMPANY.filter(function(k){return !(S[k[0]]||'').trim()});
+ c.innerHTML='<h1 class="serif">Privacidade</h1>'+
+ '<div class="panel sec"><h3 class="lbl muted">Dados do controlador e contato</h3><p class="muted" style="font-size:13px;margin:0 0 18px">Aparecem na Política de Privacidade e no FAQ, no lugar das variáveis entre chaves. A LGPD exige que a política identifique o controlador e o canal de contato.</p>'+
+ (empty.length?'<p class="msg" style="color:var(--accent)">'+empty.length+' campo(s) em branco aparecem como “[a preencher]” no site.</p>':'')+
+ '<form id="cf2" novalidate>'+COMPANY.map(function(k){return '<label class="fld"><span class="lbl">'+k[1]+' <span class="muted" style="text-transform:none;letter-spacing:0">'+k[2]+'</span></span><input name="'+k[0]+'" maxlength="200" value="'+esc(S[k[0]]||'')+'"'+(k[0]==='contact_email'?' type="email"':'')+'></label>'}).join('')+
+ '<p class="msg" id="cm2"></p><button class="btn solid sm">Salvar dados</button></form></div>'+
+ '<div class="panel sec"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><h3 class="lbl muted" style="margin:0">Política de Privacidade</h3><a class="btn sm" href="../privacidade.html" target="_blank" rel="noopener">Ver a página</a></div>'+
+ '<p class="muted" style="font-size:13px;margin:0 0 18px">'+(Pg.version?'Versão '+Pg.version+' · atualizada em '+dt(Pg.updated_at)+'. ':'')+'Cada alteração salva gera uma nova versão com a data, exibida no topo da página. '+FAQ_HINT.replace('{{email}}, {{whatsapp}}, {{empresa}}','{{empresa}}, {{cnpj}}, {{endereco}}, {{encarregado}}, {{email}}')+' Títulos de seção: “## Título”.</p>'+
+ '<form id="pgf" novalidate><label class="fld"><span class="lbl">Título</span><input name="t" maxlength="120" value="'+esc(Pg.title)+'" required></label>'+
+ '<label class="fld"><span class="lbl">Texto da política</span><textarea name="b" rows="22" maxlength="60000" style="font-size:14px;line-height:1.6">'+esc(Pg.body)+'</textarea></label>'+
+ '<label class="switch" style="margin-bottom:18px;align-items:flex-start"><input type="checkbox" name="bump"><span>Esta alteração muda o uso de cookies (por exemplo, uma nova ferramenta analítica). Pedir novo consentimento aos visitantes.</span></label>'+
+ '<p class="msg" id="pgm"></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn solid sm">Salvar política</button><button type="button" class="btn sm" id="pvb">Pré-visualizar</button></div></form>'+
+ '<div id="pgp" class="prose" style="display:none;margin-top:22px;padding:22px;border:1px solid var(--line);background:var(--paper)"></div></div>'+
+ '<div class="panel sec"><h3 class="lbl muted">Consentimento de cookies</h3><p class="muted" style="font-size:13px;margin:0 0 14px">Versão atual do consentimento: <b style="color:var(--ink)">'+cv+'</b>. Últimos 30 dias:</p>'+
+ '<div class="stats" style="margin-bottom:16px">'+stat('Aceitaram todos',C30.aceitar_todos||0)+stat('Rejeitaram opcionais',C30.rejeitar_opcionais||0)+stat('Personalizaram',C30.personalizar||0)+'</div>'+
+ '<p class="muted" style="font-size:13px;margin:0 0 14px">Hoje o site não usa cookies analíticos nem de marketing. Se passar a usar, atualize a política e peça novo consentimento.</p><button class="btn sm" id="rc">Pedir novo consentimento a todos</button></div>';
+ var tk=null;async function preview(){tk=tk||await tokens();$('#pgp').innerHTML=kbmd($('#pgf').b.value,tk)}
+ $('#pvb').onclick=async function(){var p=$('#pgp'),on=p.style.display==='none';if(on)await preview();p.style.display=on?'block':'none';this.textContent=on?'Ocultar pré-visualização':'Pré-visualizar'};
+ $('#pgf').b.oninput=function(){if($('#pgp').style.display!=='none')preview()};
+ $('#cf2').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#cm2'),em=f.contact_email.value.trim().toLowerCase(),cn=f.company_cnpj.value.trim();
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em))return msg(m,'E-mail inválido.');if(cn&&!cnpjOk(cn))return msg(m,'CNPJ inválido. Confira os números.');
+  if(cn){var d=cn.replace(/\D/g,'');cn=d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')}
+  var rows=COMPANY.map(function(k){var v=k[0]==='contact_email'?em:k[0]==='company_cnpj'?cn:f[k[0]].value.trim().replace(/\s+/g,' ');return {key:k[0],value:v,updated_at:new Date().toISOString()}});
+  var u=await sb.from('site_content').upsert(rows);if(u.error)return msg(m,'Não foi possível salvar.');TOK=null;msg(m,'Dados salvos. Já aparecem na política e no FAQ.',true)};
+ $('#pgf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#pgm'),t=f.t.value.trim(),b=f.b.value.trim();
+  if(t.length<2)return msg(m,'Informe o título.');if(b.length<50)return msg(m,'O texto da política está curto demais.');
+  if(f.bump.checked&&!confirm('Todos os visitantes verão o aviso de cookies de novo. Continuar?'))return;
+  var u=Pg.version?await sb.from('pages').update({title:t,body:b}).eq('slug','privacidade'):await sb.from('pages').insert({slug:'privacidade',title:t,body:b});
+  if(u.error)return msg(m,'Não foi possível salvar.');
+  if(f.bump.checked){var x=await sb.from('site_settings').update({consent_version:cv+1}).eq('id',1);if(x.error)return msg(m,'Política salva, mas não foi possível pedir novo consentimento.')}
+  toast('Política salva.');go()};
+ $('#rc').onclick=async function(){if(!confirm('Todos os visitantes verão o aviso de cookies de novo e precisarão escolher outra vez. Continuar?'))return;
+  var x=await sb.from('site_settings').update({consent_version:cv+1}).eq('id',1);if(x.error)return err(x.error);toast('Novo consentimento solicitado.');go()}}
 
 /* ---------- Acesso ---------- */
 async function boot(){

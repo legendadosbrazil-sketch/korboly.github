@@ -159,7 +159,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .fin h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(48px,7vw,92px);line-height:1;margin:0 0 48px}
 .pgf{border-top:1px solid var(--line);padding:56px 0 40px}
 .pgf .w{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;align-items:center}
-.fl{display:flex;gap:28px;flex-wrap:wrap}.fl a:hover{color:var(--accent)}
+.fl{display:flex;gap:14px 28px;flex-wrap:wrap;align-items:center}.fl a:hover,.fl button:hover{color:var(--accent)}.fl button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .js .rv{opacity:0;transform:translateY(30px);transition:opacity 1s var(--ease),transform 1.1s var(--ease)}
 .js .rv.in{opacity:1;transform:none}
 @media(max-width:767px){
@@ -199,8 +199,9 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
+<link rel="stylesheet" href="css/site.css">
 </head>
-<body>
+<body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
 <header class="fx top" id="top">
 <div class="tl"><button class="box lbl mb" id="mb" type="button" aria-expanded="false" aria-controls="tn">Menu</button>
@@ -224,7 +225,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 </main>
 <footer class="pgf" id="contato"><div class="w">
 <div><div class="logo flog"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></div><p class="mu" style="font-size:12px;margin-top:14px">© Korboly. Todos os direitos reservados.</p></div>
-<div class="fl lbl"><a href="#mais">Catálogo</a><a href="#contato">Contato</a><a href="https://instagram.com/korboly">Instagram</a><a href="https://www.tiktok.com/@korboly.perfumaria">TikTok</a></div>
+<div class="fl lbl"><a href="#mais">Catálogo</a><a href="faq.html">Perguntas frequentes</a><a href="privacidade.html">Privacidade</a><button type="button" class="lbl" data-cookie-prefs>Preferências de cookies</button><a href="https://instagram.com/korboly" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@korboly.perfumaria" rel="noopener">TikTok</a></div>
 </div></footer>
 <div class="grain"></div>
 <div class="detail" id="detail" role="dialog" aria-modal="true" aria-label="Detalhes da fragrância">
@@ -466,5 +467,9 @@ $('c1').innerHTML='';$('c2').innerHTML='';$('c3').innerHTML='';
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/consent.js"></script>
+<script src="js/welcome.js" defer></script>
 </body>
 </html>

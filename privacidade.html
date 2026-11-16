@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Política de Privacidade – Korboly</title>
+<meta name="description" content="Como a Korboly coleta, usa, armazena e protege seus dados pessoais, em conformidade com a LGPD. Cookies, direitos do titular e contato.">
+<link rel="canonical" href="https://korboly.com.br/privacidade.html">
+<meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+<a class="skip lbl" href="#main">Ir para o conteúdo</a>
+<header class="kbh">
+  <a href="index.html" class="back lbl" aria-label="Voltar à loja">←<span class="bt"> Voltar à loja</span></a>
+  <a href="index.html" class="logo" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a>
+  <span class="sp" aria-hidden="true"></span>
+</header>
+
+<main class="doc" id="main">
+  <p class="eyebrow lbl">Privacidade e dados pessoais</p>
+  <h1 id="title">Política de Privacidade</h1>
+  <p class="lead">Como a Korboly coleta, usa, armazena e protege os seus dados, em conformidade com a Lei Geral de Proteção de Dados (LGPD).</p>
+  <p class="meta lbl" id="meta"></p>
+  <div class="cta-row">
+    <button type="button" class="btn sm" data-cookie-prefs>Preferências de cookies</button>
+    <a class="btn sm" href="faq.html">Perguntas frequentes</a>
+  </div>
+  <nav class="toc" id="toc" aria-label="Nesta página" hidden></nav>
+  <article class="prose" id="body" aria-live="polite"><p class="state">Carregando a política…</p></article>
+</main>
+
+<footer class="kbf"><div class="w">
+  <div><a class="lg" href="index.html" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><p>© Korboly. Todos os direitos reservados.</p></div>
+  <nav aria-label="Rodapé"><a href="index.html#mais">Catálogo</a><a href="faq.html">Perguntas frequentes</a><a href="privacidade.html" aria-current="page">Privacidade</a><button type="button" data-cookie-prefs>Preferências de cookies</button><a href="https://instagram.com/korboly" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@korboly.perfumaria" rel="noopener">TikTok</a></nav>
+</div></footer>
+<div class="grain"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/md.js"></script>
+<script src="js/consent.js"></script>
+<script>
+(function () {
+  var body = document.getElementById('body'), meta = document.getElementById('meta'), toc = document.getElementById('toc');
+  function fail() {
+    body.innerHTML = '<p class="state">Não foi possível carregar a política agora. <button type="button" class="btn sm" id="retry">Tentar de novo</button></p>' +
+      '<p class="state">Se preferir, fale com a gente pelo Instagram <a href="https://instagram.com/korboly" rel="noopener">@korboly</a>.</p>';
+    document.getElementById('retry').onclick = function () { body.innerHTML = '<p class="state">Carregando a política…</p>'; load(); };
+  }
+  function load() {
+    if (!window.KBAPI || !KBAPI.ok) return fail();
+    Promise.all([KBAPI.get('pages?select=title,body,version,updated_at&slug=eq.privacidade'), KBAPI.tokens().catch(function () { return {}; })])
+      .then(function (r) {
+        var p = r[0] && r[0][0]; if (!p) return fail();
+        document.getElementById('title').textContent = p.title;
+        meta.textContent = 'Versão ' + p.version + ' · Atualizada em ' + new Date(p.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        body.innerHTML = kbmd(p.body, r[1]);
+        var hs = body.querySelectorAll('h2[id]');
+        if (hs.length > 2) {
+          toc.innerHTML = [].map.call(hs, function (h) { return '<a href="#' + h.id + '">' + h.textContent + '</a>'; }).join('');
+          toc.hidden = false;
+        }
+        if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+      })
+      .catch(fail);
+  }
+  load();
+})();
+</script>
+</body>
+</html>
