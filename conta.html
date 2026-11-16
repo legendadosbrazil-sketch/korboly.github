@@ -6,6 +6,11 @@
 <title>Minha conta – Korboly</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
 <link rel="stylesheet" href="css/ui.css">
 <style>
@@ -36,11 +41,11 @@ main{max-width:1060px;margin:0 auto;padding:clamp(28px,6vw,64px) clamp(16px,4vw,
 </style>
 </head>
 <body>
-<header><a href="index.html" class="back lbl">← Voltar à loja</a><a href="index.html" class="logo"><b>KORBOLY</b><i>PERFUMARIA</i></a><span style="width:100px"></span></header>
+<header><a href="index.html" class="back lbl">← Voltar à loja</a><a href="index.html" class="logo"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><span style="width:100px"></span></header>
 <main id="app"></main>
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
 <script src="js/config.js"></script><script src="js/sb.js"></script>
 <script>
 (function(){

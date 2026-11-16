@@ -6,6 +6,11 @@
 <title>Korboly Admin</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
 <link rel="stylesheet" href="../css/ui.css">
 <style>
@@ -49,7 +54,7 @@ h1.serif{font-size:36px;margin:0 0 28px}
 <div class="modal" id="modal"><div class="box" id="mbox"></div></div>
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
 <script src="../js/config.js"></script><script src="../js/sb.js"></script>
 <script>
 (function(){
@@ -74,7 +79,7 @@ var TABS=[['dash','Dashboard'],['prod','Produtos'],['ped','Pedidos'],['cli','Cli
 var cur='dash',me=null;
 
 function layout(){
- root.innerHTML='<div class="app"><aside class="sb" id="sb"><a class="logo" href="../index.html"><b>KORBOLY</b><i>ADMIN</i></a><nav class="lbl" id="nav">'+
+ root.innerHTML='<div class="app"><aside class="sb" id="sb"><a class="logo" href="../index.html"><img src="../img/logo.svg" alt="Korboly" width="715" height="160"><i>ADMIN</i></a><nav class="lbl" id="nav">'+
  TABS.map(function(t){return '<button data-t="'+t[0]+'">'+ic[t[0]]+t[1]+'</button>'}).join('')+'</nav><div class="bot"><a class="btn sm" href="../index.html">Ver a loja</a><a class="btn sm" href="../conta.html">Minha conta</a></div></aside>'+
  '<div><div class="top"><button class="btn sm mbtn" id="mb">Menu</button><span></span><div class="who"><b>'+esc(me.full_name||'Administrador')+'</b>Administrador</div></div><div class="cont" id="cont"></div></div></div>';
  $('#nav').onclick=function(e){var b=e.target.closest('button');if(b){cur=b.dataset.t;go();$('#sb').classList.remove('on')}};
