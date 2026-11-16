@@ -1,7 +1,7 @@
 // Configuração pública do Supabase (Settings -> API no painel do Supabase).
-// A "anon key" é feita para ficar no navegador: quem protege os dados são as regras (RLS) do banco.
+// A chave publicável (publishable) é feita para ficar no navegador: quem protege os dados são as regras (RLS) do banco.
 // NUNCA coloque aqui a "service_role key".
 window.KORBOLY = {
-  SUPABASE_URL: "COLE_AQUI_A_PROJECT_URL",
-  SUPABASE_ANON_KEY: "COLE_AQUI_A_ANON_KEY"
+  SUPABASE_URL: "https://brcepymlgicqgyiapxdj.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_RGj67nMLRfApxKR6Yx8Leg_08OB7Igg"
 };
