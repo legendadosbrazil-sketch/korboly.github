@@ -12,6 +12,10 @@
 <meta property="og:url" content="https://legendadosbrazil-sketch.github.io/korboly.github/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" as="image" href="img/dark-luxury.webp">
+<link rel="icon" href="img/icons/favicon.ico" sizes="48x48">
+<link rel="icon" href="img/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png">
+<link rel="manifest" href="img/icons/site.webmanifest">
 <meta name="theme-color" content="#EFEBE3">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
 <style>
@@ -38,6 +42,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .top>:first-child{justify-self:start}.top>:last-child{justify-self:end}
 .logo{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--ink)}
 .logo b{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:24px;letter-spacing:.34em;padding-left:.34em;line-height:1}
+.logo .lg{display:block;height:40px;width:auto}
+@media(max-width:767px){.logo .lg{height:30px}}
 .logo i{font-style:normal;font-weight:600;font-size:8.5px;letter-spacing:.34em;padding-left:.34em;color:var(--muted)}
 .acts{display:flex;align-items:center;gap:14px}.acc{display:inline-grid;place-items:center;width:28px;height:28px;color:var(--ink);transition:color .2s}.acc:hover{color:var(--accent)}
 /* tabs */
@@ -197,7 +203,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 <header class="fx top" id="top">
 <div class="tl"><button class="box lbl mb" id="mb" type="button" aria-expanded="false" aria-controls="tn">Menu</button>
 <nav class="tn lbl" id="tn" aria-label="Principal"><a href="#hero">Fragrâncias</a><a href="#mais">Sobre</a><a href="#contato">Contato</a></nav></div>
-<a class="logo" href="#hero" aria-label="Korboly"><b>KORBOLY</b><i>PERFUMARIA</i></a>
+<a class="logo" href="#hero" aria-label="Korboly"><picture><source media="(max-width:767px)" srcset="img/logo/korboly-logotipo-pequeno.svg"><img class="lg" src="img/logo/korboly-logotipo.svg" alt="Korboly" width="682" height="160"></picture><i>PERFUMARIA</i></a>
 <div class="acts"><a class="acc" href="conta.html" aria-label="Minha conta" title="Minha conta"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="9" cy="6" r="3.2"/><path d="M2.500 16c.6-3.300 3.300-5 6.500-5s5.900 1.700 6.500 5"/></svg></a><a class="box lbl" href="https://korboly.com/collections/all">Loja</a></div>
 </header>
 <nav class="ab tabs" id="tabs" aria-label="Fragrâncias"><span class="ind" id="ind"></span></nav>
@@ -215,13 +221,13 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 <section class="pr"><div class="w"><div class="prh"><h2 class="rv">Escolha a sua.</h2><a class="cta lbl rv" href="https://korboly.com/collections/all" style="margin:0">Ver o catálogo</a></div><div class="prg"><a class="pc rv" style="transition-delay:0.0s" href="https://korboly.com/products/dark-luxury"><div class="pci"><img src="img/dark-luxury.webp" alt="Frasco Dark Luxury" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Dark Luxury</h3><p>100 ML · R$ 229,90</p></div></a><a class="pc rv" style="transition-delay:0.1s" href="https://korboly.com/products/evora"><div class="pci"><img src="img/evora.webp" alt="Frasco Évora" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Évora</h3><p>60 ML · R$ 169,90</p></div></a><a class="pc rv" style="transition-delay:0.2s" href="https://korboly.com/products/haitz"><div class="pci"><img src="img/haitz.webp" alt="Frasco Haitz" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Haitz</h3><p>60 ML · R$ 179,90</p></div></a></div></div></section>
 </main>
 <footer class="pgf" id="contato"><div class="w">
-<div><div class="logo" style="align-items:flex-start"><b style="font-size:22px;padding:0">KORBOLY</b></div><p class="mu" style="font-size:12px;margin-top:14px">© Korboly. Todos os direitos reservados.</p></div>
+<div><div class="logo" style="align-items:flex-start"><img class="lg" src="img/logo/korboly-logotipo.svg" alt="Korboly" width="682" height="160" style="height:34px;margin-left:-4px"></div><p class="mu" style="font-size:12px;margin-top:14px">© Korboly. Todos os direitos reservados.</p></div>
 <div class="fl lbl"><a href="https://korboly.com/collections/all">Catálogo</a><a href="https://korboly.com/pages/contact">Contato</a><a href="https://korboly.com/policies/privacy-policy">Privacidade</a><a href="https://instagram.com/korboly">Instagram</a><a href="https://www.tiktok.com/@korboly.perfumaria">TikTok</a></div>
 </div></footer>
 <div class="grain"></div>
 <div class="detail" id="detail" role="dialog" aria-modal="true" aria-label="Detalhes da fragrância">
 <button class="box lbl cls" id="cls">Fechar</button>
-<div class="dl"><div class="logo"><b>KORBOLY</b><i>PERFUMARIA</i></div></div>
+<div class="dl"><div class="logo"><picture><source media="(max-width:767px)" srcset="img/logo/korboly-logotipo-pequeno.svg"><img class="lg" src="img/logo/korboly-logotipo.svg" alt="Korboly" width="682" height="160"></picture><i>PERFUMARIA</i></div></div>
 <div class="dtx">
 <div class="m"><span class="lbl d1" id="d1"></span></div>
 <div class="m"><span class="d2" id="d2"></span></div>
