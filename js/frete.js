@@ -25,7 +25,7 @@
     if (!/^\d{8}$/.test(cep)) { inp.setAttribute('aria-invalid', 'true'); msg.className = 'err'; msg.textContent = 'Digite um CEP com 8 números.'; inp.focus(); return; }
     if (!slug) return;
     btn.disabled = true; btn.textContent = 'Calculando…'; box.setAttribute('aria-busy', 'true');
-    window.KBAPI.fn((window.KORBOLY && window.KORBOLY.FRETE_FUNCTION) || 'frete', { cep: cep, items: [{ slug: slug, qty: 1 }] }).then(function (r) {
+    window.KBAPI.fn((window.KORBOLY && (window.KORBOLY.LOJA_FUNCTION || window.KORBOLY.FRETE_FUNCTION)) || 'loja', { cep: cep, items: [{ slug: slug, qty: 1 }] }).then(function (r) {
       var ops = (r && r.opcoes) || [];
       if (!ops.length) { msg.textContent = (r && r.aviso) || 'Nenhuma opção de entrega para este CEP.'; return; }
       msg.textContent = ops.length + (ops.length > 1 ? ' opções' : ' opção') + ' de entrega para ' + cep.slice(0, 5) + '-' + cep.slice(5) + ':';

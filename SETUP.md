@@ -62,17 +62,34 @@ Como administrar:
 
 7. **Desconto no frete (opcional):** rode `supabase/005_desconto_frete.sql`, depois em Painel → Frete preencha "Desconto no frete (R$)". O valor sai de todas as opções e o cliente vê o preço riscado.
 
-Observação: a função foi publicada no Supabase com o nome `smooth-task`; esse nome está em `js/config.js` (FRETE_FUNCTION). Sempre que o código da função mudar, cole o novo `COPIAR-PARA-O-SUPABASE.txt` nela e clique em Deploy.
+Observação: a função foi publicada no Supabase com o nome `smooth-task`; esse nome está em `js/config.js` (LOJA_FUNCTION). O código dela fica em `supabase/functions/loja/COPIAR-PARA-O-SUPABASE.txt`; sempre que mudar, cole o arquivo novo nela e clique em Deploy.
 
 Se o teste der erro, a mensagem diz o que falta (token, CEP de origem, medidas ou a função não publicada).
 O token gerado pelo Melhor Envio tem validade. Se um dia o teste disser que o token foi recusado, gere outro e troque o segredo.
 
+## 9. Pagamento com Mercado Pago (Checkout Pro)
+O cliente monta o carrinho, preenche os dados em `checkout.html` e paga na página do Mercado Pago (Pix, cartão ou boleto). Quando o pagamento é aprovado, o pedido vira "Pago" sozinho no painel.
+
+1. **Banco:** SQL Editor → cole `supabase/006_checkout_mercado_pago.sql` → Run.
+2. **Função:** Edge Functions → `smooth-task` → apague o código e cole `supabase/functions/loja/COPIAR-PARA-O-SUPABASE.txt` → Deploy. (Ela continua fazendo o frete e agora faz também o pagamento.)
+3. **Credencial do Mercado Pago:** mercadopago.com.br/developers → **Suas integrações** → **Criar aplicação** (Checkout Pro / pagamentos online). Em **Credenciais de produção**, copie o **Access Token** (começa com `APP_USR-`).
+4. **Segredo:** Edge Functions → Secrets → `MP_ACCESS_TOKEN` = o Access Token.
+5. **Avisos de pagamento (Webhooks):** na mesma aplicação → **Webhooks** → Modo produção → URL:
+   `https://brcepymlgicqgyiapxdj.supabase.co/functions/v1/smooth-task?mp=1`
+   Marque o evento **Pagamentos** e salve. Copie a **assinatura secreta** e crie o segredo `MP_WEBHOOK_SECRET` com ela.
+6. Rode o `enviar.bat`.
+7. **Teste real:** faça uma compra pequena com a sua conta pagando com Pix, confira que o pedido fica "Pago" no painel e depois devolva o dinheiro pelo Mercado Pago (Atividade → pagamento → Devolver).
+
+Como administrar: **Painel → Pedidos** mostra frete, CPF, forma de pagamento e o número do pagamento no Mercado Pago. Pedidos que o cliente começou e não pagou ficam ocultos (marque "Mostrar abandonados" para ver); eles são cancelados sozinhos quando o cliente tenta de novo e devolvem estoque e cupom. Para cancelar um pedido pago, devolva o dinheiro primeiro no Mercado Pago.
+
 ## Onde cada coisa fica
 - Site: `index.html` · Conta do cliente: `conta.html` · Painel: `admin/index.html` · FAQ: `faq.html` · Política: `privacidade.html`
-- Calculadora de frete: `js/frete.js` (site) e `supabase/functions/frete/index.ts` (servidor)
+- Calculadora de frete: `js/frete.js` · Carrinho: `js/cart.js` · Checkout: `checkout.html` · Retorno do pagamento: `pedido.html`
+- Servidor da loja (frete + pagamento): `supabase/functions/loja/index.ts`
 - Aviso de cookies: `js/consent.js` · Pop-up de primeira compra: `js/welcome.js`
 - Segurança: `supabase/schema.sql` (regras RLS, funções, bloqueio de admin)
 - Variáveis: só em `js/config.js` (URL + chave anon, ambas públicas por desenho). Senhas e chaves secretas **nunca** vão para o GitHub.
 
 ## O que ainda NÃO existe
-Carrinho, checkout e cobrança (Pix/cartão). Os pedidos e a função `create_order` já estão prontos no banco (preço calculado no servidor, cupom, baixa de estoque), mas falta a tela de compra e um provedor de pagamento (ex.: Mercado Pago), que exige sua conta.
+- Envio automático de e-mails (confirmação de pedido, código de rastreio, cupom). Hoje o cliente acompanha tudo em "Minha conta".
+- Compra da etiqueta de frete pelo painel: a etiqueta é comprada no site do Melhor Envio, e o código de rastreio é colado em Painel → Pedidos.

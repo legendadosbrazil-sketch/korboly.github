@@ -4,6 +4,7 @@
 window.KORBOLY = {
   SUPABASE_URL: "https://brcepymlgicqgyiapxdj.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_RGj67nMLRfApxKR6Yx8Leg_08OB7Igg",
-  // Nome da função de frete no Supabase (Edge Functions). Se criar outra com outro nome, troque aqui.
-  FRETE_FUNCTION: "smooth-task"
+  // Nome da função da loja no Supabase (Edge Functions): frete, pagamento e avisos do Mercado Pago.
+  // Ela foi publicada com o nome "smooth-task". Se um dia criar outra com outro nome, troque aqui.
+  LOJA_FUNCTION: "smooth-task"
 };

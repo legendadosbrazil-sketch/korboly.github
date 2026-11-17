@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Seu pedido – Korboly</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/ui.css?v=20261117d">
+<link rel="stylesheet" href="css/site.css?v=20261117d">
+<style>
+header{display:flex;justify-content:space-between;align-items:center;padding:0 clamp(16px,3vw,32px);height:72px;border-bottom:1px solid var(--line)}
+.back{color:var(--muted)}.back:hover{color:var(--ink)}
+@media(max-width:560px){header .back .bt{display:none}header .back{font-size:18px;min-width:44px}}
+main{max-width:720px;margin:0 auto;padding:clamp(28px,6vw,64px) clamp(16px,4vw,32px) 80px}
+.st{display:flex;gap:16px;align-items:flex-start;margin-bottom:28px}
+.ic{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line2);font-size:22px}
+.ic.ok{border-color:#2E7D4F;color:#2E7D4F}.ic.err{border-color:#B3261E;color:#B3261E}.ic.wait{color:var(--accent);border-color:var(--accent)}
+h1{font-size:clamp(32px,5vw,44px);margin:0 0 6px;font-weight:300;line-height:1.05}
+.st p{margin:0;color:var(--muted)}
+.card{border:1px solid var(--line);background:var(--sheet);padding:22px;margin-bottom:16px}
+.ln{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:14px}.ln .m{color:var(--muted)}.ln.t{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:600;font-size:16px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--ink);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<header><a href="index.html" class="back lbl" aria-label="Voltar à loja">←<span class="bt"> Voltar à loja</span></a><a href="index.html" class="logo"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><a href="conta.html" class="back lbl" style="width:100px;text-align:right">Minha conta</a></header>
+<main id="app"><p class="muted"><span class="spin" aria-hidden="true"></span>Carregando seu pedido…</p></main>
+<footer class="kbf"><div class="w">
+  <div><a class="lg" href="index.html" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><p>© Korboly. Todos os direitos reservados.</p></div>
+  <nav aria-label="Rodapé"><a href="index.html#mais">Catálogo</a><a href="faq.html">Perguntas frequentes</a><a href="privacidade.html">Privacidade</a><button type="button" data-cookie-prefs>Preferências de cookies</button></nav>
+</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=20261117d"></script><script src="js/sb.js?v=20261117d"></script><script src="js/api.js?v=20261117d"></script><script src="js/consent.js?v=20261117d"></script><script src="js/cart.js?v=20261117d"></script>
+<script>
+(function(){
+var app=document.getElementById('app'),q=new URLSearchParams(location.search);
+var FN=(window.KORBOLY&&(window.KORBOLY.LOJA_FUNCTION||window.KORBOLY.FRETE_FUNCTION))||'loja';
+var num=parseInt(q.get('n')||'',10),pid=(q.get('payment_id')||q.get('collection_id')||'').replace(/\D/g,''),tries=0,synced=false;
+if(!window.KB_READY||!window.sb||!num){app.innerHTML='<p>Pedido não encontrado. Veja seus pedidos em <a href="conta.html" style="text-decoration:underline">Minha conta</a>.</p>';return}
+var MPRE=/^https:\/\/([a-z0-9-]+\.)*mercadopago\.com(\.br)?\//;
+
+async function load(){
+ var s=await sb.auth.getSession();
+ if(!s.data.session){app.innerHTML='<h1 class="serif">Entre para ver seu pedido</h1><p class="muted">Por segurança, o pedido só aparece para quem fez a compra.</p><div class="acts"><a class="btn solid" href="conta.html?next='+encodeURIComponent('pedido.html?n='+num+(pid?'&payment_id='+pid:''))+'">Entrar</a></div>';return}
+ if(pid&&!synced){synced=true;try{await sb.functions.invoke(FN,{body:{action:'sincronizar',payment_id:pid}})}catch(e){}}
+ var r=await sb.from('orders').select('*,order_items(product_name,quantity,unit_price_cents)').eq('number',num).maybeSingle();
+ if(r.error||!r.data){app.innerHTML='<h1 class="serif">Pedido não encontrado</h1><p class="muted">Confira seus pedidos em <a href="conta.html" style="text-decoration:underline">Minha conta</a>.</p>';return}
+ render(r.data);
+ var ps=r.data.payment_status;
+ if((ps==='pendente'||ps==='em_analise')&&r.data.status!=='cancelado'&&tries<24){tries++;setTimeout(load,tries<6?4000:10000)}
+}
+function render(o){
+ var ps=o.payment_status,cancel=o.status==='cancelado',H={
+  pago:['ok','✓','Pagamento aprovado','Obrigado! Seu pedido #'+o.number+' foi confirmado. Avisaremos quando ele for enviado.'],
+  em_analise:['wait','…','Pagamento em análise','O Mercado Pago está analisando o pagamento do pedido #'+o.number+'. Isso costuma levar alguns minutos; esta página se atualiza sozinha.'],
+  pendente:['wait','…','Aguardando pagamento','Ainda não recebemos a confirmação do pagamento do pedido #'+o.number+'. Se você pagou com Pix ou boleto, a confirmação pode levar alguns minutos.'],
+  recusado:['err','!','Pagamento não aprovado','O pagamento do pedido #'+o.number+' foi recusado. Você pode tentar de novo com outra forma de pagamento, como o Pix.'],
+  reembolsado:['err','↺','Pagamento reembolsado','O pagamento do pedido #'+o.number+' foi devolvido.']}[ps]||['wait','…','Pedido #'+o.number,''];
+ if(cancel&&ps!=='pago')H=['err','×','Pedido cancelado','Este pedido foi cancelado. Se ainda quiser as fragrâncias, é só fazer um novo pedido.'];
+ if(ps==='pago')try{KBCart.clear()}catch(e){}
+ var it=(o.order_items||[]).map(function(i){return '<div class="ln"><span>'+esc(i.quantity)+'× '+esc(i.product_name)+'</span><span>'+brl(i.unit_price_cents*i.quantity)+'</span></div>'}).join('');
+ var a=o.shipping_address||{};
+ var canPay=!cancel&&(ps==='pendente'||ps==='recusado')&&o.mp_init_point&&MPRE.test(o.mp_init_point);
+ app.innerHTML='<div class="st"><div class="ic '+H[0]+'" aria-hidden="true">'+H[1]+'</div><div><h1 class="serif">'+H[2]+'</h1><p role="status">'+esc(H[3])+'</p></div></div>'+
+  (canPay?'<div class="acts" style="margin:0 0 24px"><a class="btn solid" href="'+esc(o.mp_init_point)+'">'+(ps==='recusado'?'Tentar pagar de novo':'Pagar agora')+'</a></div>':'')+
+  ((ps==='pendente'||ps==='em_analise')&&!cancel?'<p class="muted" style="font-size:13px;margin:-8px 0 20px"><span class="spin" aria-hidden="true"></span>Verificando o pagamento…</p>':'')+
+  '<div class="card"><h2 class="lbl muted" style="margin:0 0 12px">Pedido #'+o.number+' · '+dt(o.created_at)+'</h2>'+it+
+  '<div class="ln"><span class="m">Subtotal</span><span>'+brl(o.subtotal_cents)+'</span></div>'+
+  (o.discount_cents?'<div class="ln"><span class="m">Desconto'+(o.coupon_code?' ('+esc(o.coupon_code)+')':'')+'</span><span>− '+brl(o.discount_cents)+'</span></div>':'')+
+  '<div class="ln"><span class="m">Frete'+(o.shipping_service?' ('+esc(o.shipping_service)+')':'')+'</span><span>'+(o.shipping_cents?brl(o.shipping_cents):'Grátis')+'</span></div>'+
+  '<div class="ln t"><span>Total</span><span>'+brl(o.total_cents)+'</span></div></div>'+
+  '<div class="card"><h2 class="lbl muted" style="margin:0 0 10px">Entrega</h2><p style="margin:0;font-size:14px;line-height:1.6">'+esc(a.recipient||o.customer_name)+'<br>'+esc(a.street||'')+', '+esc(a.number||'')+(a.complement?' – '+esc(a.complement):'')+'<br>'+esc(a.district||'')+' · '+esc(a.city||'')+'/'+esc(a.state||'')+' · CEP '+esc(String(a.zip||'').replace(/^(\d{5})(\d{3})$/,'$1-$2'))+'</p>'+
+  (o.tracking_code?'<p style="margin:12px 0 0;font-size:14px">Código de rastreio: <b>'+esc(o.tracking_code)+'</b></p>':'')+'</div>'+
+  '<div class="acts"><a class="btn" href="conta.html">Ver todos os pedidos</a><a class="btn" href="index.html">Voltar à loja</a></div>'}
+load();
+})();
+</script>
+</body>
+</html>

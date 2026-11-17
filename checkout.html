@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Finalizar compra – Korboly</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#EFEBE3">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/ui.css?v=20261117d">
+<link rel="stylesheet" href="css/site.css?v=20261117d">
+<style>
+header{display:flex;justify-content:space-between;align-items:center;padding:0 clamp(16px,3vw,32px);height:72px;border-bottom:1px solid var(--line)}
+.back{color:var(--muted)}.back:hover{color:var(--ink)}
+@media(max-width:560px){header .back .bt{display:none}header .back{font-size:18px;min-width:44px}}
+main{max-width:1100px;margin:0 auto;padding:clamp(24px,5vw,56px) clamp(16px,4vw,32px) 80px}
+h1{font-size:clamp(34px,5vw,48px);margin:0 0 28px;font-weight:300}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:clamp(24px,4vw,56px);align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.sec{border-top:1px solid var(--line);padding:22px 0 26px}
+.sec h2{font:600 11px/1 "Inter Tight",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 18px;display:flex;align-items:center;gap:10px}
+.sec h2 b{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid var(--line2);border-radius:50%;font-size:10px;color:var(--ink)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.r3{display:grid;grid-template-columns:2fr 1fr;gap:0 16px}.r4{display:grid;grid-template-columns:1fr 2fr 70px;gap:0 16px}
+@media(max-width:560px){.r2,.r3{grid-template-columns:1fr}.r4{grid-template-columns:1fr 70px}.r4 .cty{grid-column:1/-1;order:-1}}
+.it{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.it img{width:64px;height:84px;object-fit:cover;background:var(--ph,#DDD7C9)}
+.it h3{margin:0;font:400 22px/1.1 "Cormorant Garamond",serif}.it .v{color:var(--muted);font-size:13px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line2);margin-top:8px}
+.qty button{width:32px;height:32px;font-size:16px}.qty span{min-width:26px;text-align:center;font-size:14px}
+.rm{font-size:12px;color:var(--muted);text-decoration:underline;margin-left:12px}
+.pr{text-align:right;font-weight:600;white-space:nowrap}
+.opt{display:grid;grid-template-columns:20px 1fr auto;gap:4px 12px;align-items:start;padding:14px;border:1px solid var(--line);margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.opt:hover{border-color:var(--line2)}.opt.on{border-color:var(--ink);background:var(--sheet)}
+.opt input{margin:3px 0 0;accent-color:var(--ink)}.opt .s{font-weight:600;font-size:14px}.opt .d{grid-column:2/3;font-size:12.5px;color:var(--muted)}
+.opt .p{text-align:right;font-weight:600;font-size:14px;white-space:nowrap}.opt .p s{color:var(--muted);font-weight:500;margin-right:4px}
+.sum{position:sticky;top:24px;border:1px solid var(--line);background:var(--sheet);padding:24px}
+@media(max-width:900px){.sum{position:static}}
+.sum h2{font:400 26px/1 "Cormorant Garamond",serif;margin:0 0 18px}
+.ln{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}.ln.t{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:18px;font-weight:600}
+.ln .m{color:var(--muted)}.ln.dc{color:var(--accent)}
+.cup{display:flex;gap:8px;margin:14px 0 4px}.cup input{flex:1;min-width:0;height:40px;padding:0 10px;border:1px solid var(--line2);background:transparent;color:var(--ink);font:500 14px "Inter Tight",sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.cup button{height:40px;padding:0 14px;border:1px solid var(--ink)}
+.pay{width:100%;height:52px;margin-top:18px;background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+.pay:hover:not(:disabled){background:var(--accent);border-color:var(--accent)}.pay:disabled{opacity:.55;cursor:not-allowed}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;line-height:1.5}
+.note a{text-decoration:underline;text-underline-offset:2px}
+.box{border:1px solid var(--line);padding:22px;background:var(--sheet)}
+.empty{text-align:center;padding:60px 0}.empty p{color:var(--muted)}
+.addr{display:grid;gap:8px;margin-bottom:14px}
+.addr label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);cursor:pointer;font-size:14px}
+.addr label.on{border-color:var(--ink);background:var(--sheet)}.addr input{accent-color:var(--ink);margin-top:3px}
+.chk{display:flex;gap:10px;align-items:center;font-size:14px;margin:4px 0 0}.chk input{accent-color:var(--ink);width:16px;height:16px}
+.hide{display:none!important}
+.fld .hint{font-size:12px;color:var(--muted);margin-top:4px;display:block;letter-spacing:0;text-transform:none;font-weight:500}
+</style>
+</head>
+<body>
+<header><a href="index.html" class="back lbl" aria-label="Continuar comprando">←<span class="bt"> Continuar comprando</span></a><a href="index.html" class="logo"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><span style="width:100px"></span></header>
+<main id="app"><p class="muted">Carregando…</p></main>
+<footer class="kbf"><div class="w">
+  <div><a class="lg" href="index.html" aria-label="Korboly, página inicial"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></a><p>© Korboly. Todos os direitos reservados.</p></div>
+  <nav aria-label="Rodapé"><a href="index.html#mais">Catálogo</a><a href="faq.html">Perguntas frequentes</a><a href="privacidade.html">Privacidade</a><button type="button" data-cookie-prefs>Preferências de cookies</button></nav>
+</div></footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=20261117d"></script><script src="js/sb.js?v=20261117d"></script><script src="js/api.js?v=20261117d"></script><script src="js/consent.js?v=20261117d"></script><script src="js/cart.js?v=20261117d"></script>
+<script>
+(function(){
+var app=document.getElementById('app'),toastEl=document.getElementById('toast'),tt;
+function toast(m,err){toastEl.textContent=m;toastEl.className='toast on'+(err?' err':'');clearTimeout(tt);tt=setTimeout(function(){toastEl.className='toast'},4200)}
+function $(s,r){return (r||document).querySelector(s)}
+var FN=(window.KORBOLY&&(window.KORBOLY.LOJA_FUNCTION||window.KORBOLY.FRETE_FUNCTION))||'loja';
+if(!window.KB_READY||!window.sb){app.innerHTML='<div class="empty"><h1 class="serif">Em configuração</h1></div>';return}
+
+var S={user:null,profile:null,products:{},addresses:[],addr:'new',ship:null,shipOpts:[],shipFor:'',coupon:null,busy:false,quoteSeq:0};
+var digits=function(v){return String(v||'').replace(/\D/g,'')};
+function cpfOk(c){c=digits(c);if(!/^\d{11}$/.test(c)||/^(\d)\1{10}$/.test(c))return false;for(var n=9;n<11;n++){var s=0;for(var i=0;i<n;i++)s+=Number(c[i])*(n+1-i);if(((s*10)%11)%10!==Number(c[n]))return false}return true}
+function fmtCpf(v){var d=digits(v).slice(0,11);return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/,'.$1-$2')}
+function fmtTel(v){var d=digits(v).slice(0,11);if(d.length<=2)return d;if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7)}
+function fmtCep(v){var d=digits(v).slice(0,8);return d.length>5?d.slice(0,5)+'-'+d.slice(5):d}
+function img(u){return /^https?:/.test(u||'')?u:(u||'')}
+
+async function boot(){
+ var items=KBCart.items();
+ if(!items.length){app.innerHTML='<div class="empty"><h1 class="serif">Seu carrinho está vazio</h1><p>Escolha uma fragrância para continuar.</p><a class="btn solid" href="index.html">Ver fragrâncias</a></div>';return}
+ try{var P=await KBAPI.get('products?select=id,slug,name,price_cents,volume_ml,images,available&slug=in.('+items.map(function(i){return i.slug}).join(',')+')');
+  P.forEach(function(p){S.products[p.slug]=p});}catch(e){app.innerHTML='<div class="empty"><p>Não foi possível carregar o carrinho. Recarregue a página.</p></div>';return}
+ items.forEach(function(i){var p=S.products[i.slug];if(!p||!p.available)KBCart.remove(i.slug)});
+ if(!KBCart.items().length)return boot();
+ var s=await sb.auth.getSession();S.user=s.data.session&&s.data.session.user;
+ if(S.user){var r=await Promise.all([sb.from('profiles').select('*').eq('id',S.user.id).single(),sb.from('addresses').select('*').order('is_default',{ascending:false}).order('created_at',{ascending:false})]);
+  S.profile=r[0].data||{};S.addresses=r[1].data||[];if(S.addresses.length)S.addr=S.addresses[0].id}
+ render()}
+
+function sub(){return KBCart.items().reduce(function(a,i){var p=S.products[i.slug];return a+(p?p.price_cents*i.qty:0)},0)}
+
+function render(){
+ var items=KBCart.items();
+ if(!items.length)return boot();
+ var cart=items.map(function(i){var p=S.products[i.slug];return '<div class="it"><img src="'+esc(img(p.images&&p.images[0]))+'" alt=""><div><h3>'+esc(p.name)+'</h3><span class="v">'+(p.volume_ml?p.volume_ml+' ml · ':'')+brl(p.price_cents)+'</span><div><span class="qty"><button type="button" data-q="'+i.slug+'" data-d="-1" aria-label="Diminuir quantidade de '+esc(p.name)+'">−</button><span aria-live="polite">'+i.qty+'</span><button type="button" data-q="'+i.slug+'" data-d="1" aria-label="Aumentar quantidade de '+esc(p.name)+'">+</button></span><button type="button" class="rm" data-rm="'+i.slug+'">Remover</button></div></div><div class="pr">'+brl(p.price_cents*i.qty)+'</div></div>'}).join('');
+ var left='<div class="sec" style="border-top:0;padding-top:0"><h2><b>1</b>Seu carrinho</h2>'+cart+'</div>';
+ if(!S.user){
+  left+='<div class="sec"><h2><b>2</b>Identificação</h2><div class="box"><p style="margin:0 0 16px">Para finalizar a compra e acompanhar o pedido, entre na sua conta ou crie uma. Seu carrinho fica guardado.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn solid" href="conta.html?next=checkout.html">Entrar</a><a class="btn" href="conta.html?mode=signup&next=checkout.html">Criar conta</a></div></div></div>';
+ } else {
+  var pf=S.profile||{};
+  left+='<form id="cf" novalidate><div class="sec"><h2><b>2</b>Seus dados</h2>'+
+   '<label class="fld"><span class="lbl">Nome completo de quem recebe</span><input name="nome" autocomplete="name" maxlength="120" value="'+esc(S.form&&S.form.nome||pf.full_name||'')+'" required></label>'+
+   '<div class="r2"><label class="fld"><span class="lbl">CPF</span><input name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" value="'+esc(S.form&&S.form.cpf||'')+'" required><span class="hint">Usado na nota/declaração e pelo Mercado Pago.</span></label>'+
+   '<label class="fld"><span class="lbl">Celular com DDD</span><input name="tel" inputmode="tel" autocomplete="tel-national" maxlength="15" placeholder="(11) 99999-0000" value="'+esc(fmtTel(S.form&&S.form.tel||pf.phone||''))+'" required></label></div></div>'+
+   '<div class="sec"><h2><b>3</b>Endereço de entrega</h2>'+
+   (S.addresses.length?'<div class="addr" role="radiogroup" aria-label="Endereços salvos">'+S.addresses.map(function(a){return '<label class="'+(S.addr===a.id?'on':'')+'"><input type="radio" name="ad" value="'+a.id+'"'+(S.addr===a.id?' checked':'')+'><span><b>'+esc(a.recipient)+'</b><br>'+esc(a.street)+', '+esc(a.number)+(a.complement?' – '+esc(a.complement):'')+'<br>'+esc(a.district)+' · '+esc(a.city)+'/'+esc(a.state)+' · '+fmtCep(a.zip)+'</span></label>'}).join('')+'<label class="'+(S.addr==='new'?'on':'')+'"><input type="radio" name="ad" value="new"'+(S.addr==='new'?' checked':'')+'><span>Usar outro endereço</span></label></div>':'')+
+   '<div id="na" class="'+(S.addr==='new'?'':'hide')+'">'+
+   '<div class="r3"><label class="fld"><span class="lbl">CEP</span><input name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="'+esc(fmtCep(S.form&&S.form.cep||''))+'"><span class="hint"><a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></span></label><span></span></div>'+
+   '<div class="r3"><label class="fld"><span class="lbl">Rua / Avenida</span><input name="rua" autocomplete="address-line1" maxlength="160" value="'+esc(S.form&&S.form.rua||'')+'"></label><label class="fld"><span class="lbl">Número</span><input name="num" maxlength="20" value="'+esc(S.form&&S.form.num||'')+'"></label></div>'+
+   '<div class="r2"><label class="fld"><span class="lbl">Complemento (opcional)</span><input name="comp" autocomplete="address-line2" maxlength="80" value="'+esc(S.form&&S.form.comp||'')+'"></label><label class="fld"><span class="lbl">Bairro</span><input name="bai" maxlength="80" value="'+esc(S.form&&S.form.bai||'')+'"></label></div>'+
+   '<div class="r3"><label class="fld cty"><span class="lbl">Cidade</span><input name="cid" autocomplete="address-level2" maxlength="80" value="'+esc(S.form&&S.form.cid||'')+'"></label><label class="fld"><span class="lbl">UF</span><input name="uf" autocomplete="address-level1" maxlength="2" value="'+esc(S.form&&S.form.uf||'')+'" style="text-transform:uppercase"></label></div>'+
+   '<label class="chk"><input type="checkbox" name="salvar"'+(S.form&&S.form.salvar===false?'':' checked')+'> Salvar este endereço na minha conta</label></div></div>'+
+   '<div class="sec"><h2><b>4</b>Entrega</h2><div id="ship" aria-live="polite"><p class="muted" style="margin:0">Informe o endereço para ver as opções de entrega.</p></div></div></form>';
+ }
+ app.innerHTML='<h1 class="serif">Finalizar compra</h1><div class="grid"><div>'+left+'</div><aside class="sum" aria-label="Resumo do pedido"><h2>Resumo</h2><div id="tot"></div>'+
+  (S.user?'<form class="cup" id="cupf" novalidate><label class="sr" for="cup" style="position:absolute;left:-9999px">Cupom de desconto</label><input id="cup" placeholder="Cupom de desconto" maxlength="40" autocomplete="off" value="'+esc(S.coupon?S.coupon.code:'')+'"><button type="submit" class="lbl">'+(S.coupon?'Remover':'Aplicar')+'</button></form><p class="msg" id="cupm" style="margin:4px 0 0"></p>':'')+
+  '<button class="pay lbl" id="pay"'+(S.user?'':' disabled')+'>Pagar com Mercado Pago</button><p class="msg" id="paym" style="margin-top:12px"></p>'+
+  '<p class="note">Você será levado à página segura do Mercado Pago para pagar com Pix, cartão ou boleto. Os dados do cartão ficam só com o Mercado Pago; a Korboly não tem acesso a eles. Seus dados de entrega e o CPF são usados para emitir o pedido, calcular o frete e processar o pagamento, conforme a nossa <a href="privacidade.html">Política de Privacidade</a>.</p></aside></div>';
+ bind();totals();
+ if(S.user)maybeQuote(true)}
+
+function curAddr(){
+ var f=$('#cf');if(!f)return null;
+ if(S.addr!=='new'){var a=S.addresses.find(function(x){return x.id===S.addr});if(a)return {recipient:f.nome.value.trim(),zip:digits(a.zip),street:a.street,number:a.number,complement:a.complement||'',district:a.district,city:a.city,state:a.state}}
+ return {recipient:f.nome.value.trim(),zip:digits(f.cep.value),street:f.rua.value.trim(),number:f.num.value.trim(),complement:f.comp.value.trim(),district:f.bai.value.trim(),city:f.cid.value.trim(),state:f.uf.value.trim().toUpperCase()}}
+function keepForm(){var f=$('#cf');if(!f)return;S.form={nome:f.nome.value,cpf:f.cpf.value,tel:f.tel.value,cep:f.cep.value,rua:f.rua.value,num:f.num.value,comp:f.comp.value,bai:f.bai.value,cid:f.cid.value,uf:f.uf.value,salvar:f.salvar.checked}}
+
+function totals(){
+ var s=sub(),d=0;
+ if(S.coupon){d=S.coupon.kind==='percent'?Math.floor(s*Math.min(S.coupon.value,100)/100):Math.min(S.coupon.value,s)}
+ var sh=S.ship,h='<div class="ln"><span class="m">Subtotal</span><span>'+brl(s)+'</span></div>';
+ if(d)h+='<div class="ln dc"><span>Cupom '+esc(S.coupon.code)+'</span><span>− '+brl(d)+'</span></div>';
+ h+='<div class="ln"><span class="m">Frete'+(sh?' ('+esc(sh.servico+(sh.transportadora&&sh.transportadora.toLowerCase()!==sh.servico.toLowerCase()?' · '+sh.transportadora:''))+')':'')+'</span><span>'+(sh?(sh.preco_centavos?brl(sh.preco_centavos):'Grátis'):'—')+'</span></div>';
+ h+='<div class="ln t"><span>Total</span><span>'+brl(s-d+(sh?sh.preco_centavos:0))+'</span></div>';
+ $('#tot').innerHTML=h;
+ var b=$('#pay');if(b&&S.user)b.disabled=!sh||S.busy}
+
+var qTimer;
+function maybeQuote(now){clearTimeout(qTimer);qTimer=setTimeout(quote,now?0:450)}
+async function quote(){
+ var a=curAddr(),box=$('#ship');if(!a||!box)return;
+ var key=a.zip+'|'+JSON.stringify(KBCart.items());
+ if(!/^\d{8}$/.test(a.zip)){S.ship=null;S.shipOpts=[];S.shipFor='';box.innerHTML='<p class="muted" style="margin:0">Informe o CEP para ver as opções de entrega.</p>';totals();return}
+ if(key===S.shipFor&&S.shipOpts.length){paintShip();return}
+ var seq=++S.quoteSeq;box.innerHTML='<p class="muted" style="margin:0">Calculando o frete…</p>';S.ship=null;totals();
+ try{var r=await KBAPI.fn(FN,{cep:a.zip,items:KBCart.items()});if(seq!==S.quoteSeq)return;
+  S.shipOpts=r.opcoes||[];S.shipFor=key;S.shipDisc=r.desconto_centavos||0;
+  if(!S.shipOpts.length){box.innerHTML='<p class="msg err" style="margin:0">'+esc(r.aviso||'Nenhuma opção de entrega para este CEP.')+'</p>';return}
+  var keep=S.shipSel&&S.shipOpts.find(function(o){return o.id===S.shipSel});S.ship=keep||S.shipOpts[0];S.shipSel=S.ship.id;paintShip()}
+ catch(e){if(seq!==S.quoteSeq)return;S.shipOpts=[];S.shipFor='';box.innerHTML='<p class="msg err" style="margin:0">'+esc(e&&e.status===400&&e.message?e.message:'Não foi possível calcular o frete agora. Tente de novo em instantes.')+'</p>'}
+ totals()}
+function paintShip(){
+ var box=$('#ship');
+ box.innerHTML=(S.shipDisc?'<p style="margin:0 0 12px;color:var(--accent);font-weight:600;font-size:13px">A Korboly paga '+brl(S.shipDisc)+' do seu frete.</p>':'')+'<div role="radiogroup" aria-label="Opções de entrega">'+S.shipOpts.map(function(o){var on=S.ship&&S.ship.id===o.id;
+  return '<label class="opt'+(on?' on':'')+'"><input type="radio" name="sh" value="'+o.id+'"'+(on?' checked':'')+'><span class="s">'+esc(o.servico)+(o.transportadora&&o.transportadora.toLowerCase()!==o.servico.toLowerCase()?' · '+esc(o.transportadora):'')+'</span><span class="p">'+(o.preco_original_centavos>o.preco_centavos?'<s>'+brl(o.preco_original_centavos)+'</s>':'')+(o.preco_centavos?brl(o.preco_centavos):'Grátis')+'</span><span class="d">'+(o.prazo_min===o.prazo_max?'até '+o.prazo_max:o.prazo_min+' a '+o.prazo_max)+' dias úteis após a postagem</span></label>'}).join('')+'</div>';
+ totals()}
+
+function bind(){
+ app.onclick=function(e){var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.q){var it=KBCart.items().find(function(i){return i.slug===b.dataset.q});if(it){keepForm();KBCart.set(it.slug,it.qty+Number(b.dataset.d));S.shipFor='';render()}}
+  if(b.dataset.rm){keepForm();KBCart.remove(b.dataset.rm);S.shipFor='';render()}};
+ var f=$('#cf');
+ if(f){
+  f.addEventListener('input',function(){var pm=$('#paym');if(pm&&pm.textContent)msg(pm,'')});
+  f.cpf.oninput=function(){this.value=fmtCpf(this.value)};
+  f.tel.oninput=function(){this.value=fmtTel(this.value)};
+  f.uf.oninput=function(){this.value=this.value.replace(/[^a-zA-Z]/g,'').toUpperCase()};
+  f.cep.oninput=async function(){this.value=fmtCep(this.value);var d=digits(this.value);
+   if(d.length===8&&d!==S.lastCep){S.lastCep=d;
+    try{var ctl=new AbortController();setTimeout(function(){ctl.abort()},6000);var r=await fetch('https://viacep.com.br/ws/'+d+'/json/',{signal:ctl.signal,credentials:'omit'}).then(function(x){return x.json()});
+     if(r&&!r.erro){if(r.logradouro&&!f.rua.value)f.rua.value=r.logradouro;if(r.bairro&&!f.bai.value)f.bai.value=r.bairro;if(r.localidade)f.cid.value=r.localidade;if(r.uf)f.uf.value=r.uf;if(!f.num.value)f.num.focus()}}catch(x){}}
+   maybeQuote()};
+  [].forEach.call(f.querySelectorAll('input[name=ad]'),function(r){r.onchange=function(){keepForm();S.addr=this.value;S.shipFor='';render()}});
+  $('#ship').onchange=function(e){if(e.target.name==='sh'){S.shipSel=Number(e.target.value);S.ship=S.shipOpts.find(function(o){return o.id===S.shipSel});paintShip()}};
+ }
+ var cf=$('#cupf');if(cf)cf.onsubmit=async function(e){e.preventDefault();var m=$('#cupm'),inp=$('#cup');
+  if(S.coupon){S.coupon=null;inp.value='';this.querySelector('button').textContent='Aplicar';msg(m,'');totals();return}
+  var c=inp.value.trim();if(!c)return msg(m,'Digite o código do cupom.');
+  var r=await sb.rpc('preview_coupon',{p_code:c,p_subtotal_cents:sub()});
+  if(r.error)return msg(m,(r.error.message&&r.error.message.length<160)?r.error.message:'Cupom inválido.');
+  S.coupon=r.data;inp.value=r.data.code;this.querySelector('button').textContent='Remover';msg(m,'Cupom aplicado.',true);totals()};
+ var pay=$('#pay');if(pay&&S.user)pay.onclick=submit}
+
+function msg(el,t,ok){if(!el)return;el.className='msg '+(ok?'ok':'err');el.textContent=t||''}
+
+async function submit(){
+ var f=$('#cf'),m=$('#paym');msg(m,'');
+ var a=curAddr();
+ if(a.recipient.split(/\s+/).filter(Boolean).length<2){f.nome.focus();return msg(m,'Informe o nome completo de quem vai receber.')}
+ if(!cpfOk(f.cpf.value)){f.cpf.focus();f.cpf.setAttribute('aria-invalid','true');return msg(m,'CPF inválido. Confira os números.')}
+ f.cpf.removeAttribute('aria-invalid');
+ if(!/^\d{10,11}$/.test(digits(f.tel.value))){f.tel.focus();return msg(m,'Informe um celular com DDD.')}
+ if(!/^\d{8}$/.test(a.zip)||!a.street||!a.number||!a.district||!a.city||!/^[A-Z]{2}$/.test(a.state)){if(S.addr==='new'){var first=['cep','rua','num','bai','cid','uf'].find(function(n){return !f[n].value.trim()});if(first)f[first].focus()}return msg(m,'Complete o endereço: CEP, rua, número, bairro, cidade e UF.')}
+ if(!S.ship)return msg(m,'Escolha uma opção de entrega.');
+ S.busy=true;totals();var b=$('#pay');b.textContent='Gerando pagamento…';
+ try{
+  if(S.addr==='new'&&f.salvar.checked){var ins=await sb.from('addresses').insert({user_id:S.user.id,recipient:a.recipient,zip:a.zip,street:a.street,number:a.number,complement:a.complement||null,district:a.district,city:a.city,state:a.state,is_default:!S.addresses.length}).select().single();
+   if(!ins.error&&ins.data){S.addresses.unshift(ins.data);S.addr=ins.data.id}}
+  var res=await sb.functions.invoke(FN,{body:{action:'checkout',items:KBCart.items(),address:a,cpf:digits(f.cpf.value),phone:digits(f.tel.value),servico_id:S.ship.id,coupon:S.coupon?S.coupon.code:''}});
+  var d=res.data;
+  if(res.error){try{d=res.error.context&&res.error.context.json?await res.error.context.json():null}catch(x){d=null}
+   if(d&&res.error.context&&res.error.context.status===409){S.shipFor='';maybeQuote(true)}
+   throw new Error(d&&d.error?d.error:'Não foi possível iniciar o pagamento. Tente de novo.')}
+  if(!d||!d.pagar_em||!/^https:\/\/([a-z0-9-]+\.)*mercadopago\.com(\.br)?\//.test(d.pagar_em))throw new Error('Resposta inesperada do pagamento.');
+  try{sessionStorage.setItem('kb_last_order',String(d.pedido))}catch(x){}
+  b.textContent='Abrindo o Mercado Pago…';location.href=d.pagar_em}
+ catch(e){S.busy=false;b.textContent='Pagar com Mercado Pago';totals();msg(m,e.message||'Erro.');toast(e.message||'Erro.',1)}}
+
+window.addEventListener('kb:cart',function(){});
+boot();
+})();
+</script>
+</body>
+</html>
