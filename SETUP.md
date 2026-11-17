@@ -60,6 +60,10 @@ Como administrar:
 5. **Painel → Produtos:** em cada perfume, preencha peso (g) e medidas (cm) **já embalado para envio**.
 6. **Painel → Frete:** CEP de onde os pedidos saem e dias para preparar o envio → Salvar. Use **Testar cotação** com qualquer CEP. Se aparecerem as opções, marque **Mostrar a calculadora de frete no site** e salve.
 
+7. **Desconto no frete (opcional):** rode `supabase/005_desconto_frete.sql`, depois em Painel → Frete preencha "Desconto no frete (R$)". O valor sai de todas as opções e o cliente vê o preço riscado.
+
+Observação: a função foi publicada no Supabase com o nome `smooth-task`; esse nome está em `js/config.js` (FRETE_FUNCTION). Sempre que o código da função mudar, cole o novo `COPIAR-PARA-O-SUPABASE.txt` nela e clique em Deploy.
+
 Se o teste der erro, a mensagem diz o que falta (token, CEP de origem, medidas ou a função não publicada).
 O token gerado pelo Melhor Envio tem validade. Se um dia o teste disser que o token foi recusado, gere outro e troque o segredo.
 

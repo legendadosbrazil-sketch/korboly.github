@@ -12,7 +12,7 @@
 <link rel="manifest" href="../site.webmanifest">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
-<link rel="stylesheet" href="../css/ui.css?v=20261117b">
+<link rel="stylesheet" href="../css/ui.css?v=20261117c">
 <style>
 body{min-height:100vh}
 .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
@@ -57,7 +57,7 @@ h1.serif{font-size:36px;margin:0 0 28px}
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script src="../js/config.js?v=20261117b"></script><script src="../js/sb.js?v=20261117b"></script><script src="../js/md.js?v=20261117b"></script>
+<script src="../js/config.js?v=20261117c"></script><script src="../js/sb.js?v=20261117c"></script><script src="../js/md.js?v=20261117c"></script>
 <script>
 (function(){
 var root=document.getElementById('root'),modal=document.getElementById('modal'),mbox=document.getElementById('mbox'),toastEl=document.getElementById('toast'),tt;
@@ -235,6 +235,8 @@ async function vFrete(c){
   '<div class="row3"><label class="fld"><span class="lbl">CEP de origem</span><input name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" value="'+esc(cepF(K.origin_cep))+'"></label>'+
   '<label class="fld"><span class="lbl">Dias para preparar o envio</span><input name="dias" inputmode="numeric" value="'+(S.ship_handling_days||0)+'"></label>'+
   '<label class="fld"><span class="lbl">Serviços (opcional)</span><input name="srv" placeholder="todos" value="'+esc(K.services||'')+'"></label></div>'+
+  ('ship_discount_cents' in S?'<div class="row3"><label class="fld"><span class="lbl">Desconto no frete (R$)</span><input name="desc" inputmode="decimal" placeholder="0,00" value="'+(S.ship_discount_cents?real(S.ship_discount_cents):'')+'"></label></div>'+
+  '<p class="muted" style="font-size:13px;margin:-4px 0 16px">Valor que a loja paga em cada envio. É descontado de todas as opções de frete e o cliente vê o preço riscado. Se o frete custar menos que o desconto, sai grátis e a loja paga o frete inteiro. Deixe vazio para não dar desconto.</p>':'<p class="muted" style="font-size:13px;margin:0 0 16px">Para usar desconto no frete, rode <b>supabase/005_desconto_frete.sql</b> no Supabase.</p>')+
   '<p class="muted" style="font-size:13px;margin:-4px 0 16px">Os dias de preparo são somados ao prazo da transportadora. Em "Serviços", deixe vazio para mostrar todas as opções, ou escreva os códigos separados por vírgula (o teste abaixo mostra o código de cada serviço).</p>'+
   '<p class="msg" id="shm"></p><button class="btn solid">Salvar</button></form></div>'+
  '<div class="panel sec"><h3 class="lbl muted">Testar cotação</h3><form id="stf" novalidate style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'+
@@ -248,9 +250,11 @@ async function vFrete(c){
   if(dias==null)return msg(m,'Dias de preparo: número inteiro de 0 a 30.');
   if(srv&&!/^\d+(,\d+)*$/.test(srv))return msg(m,'Serviços: só códigos numéricos separados por vírgula (ex.: 1,2).');
   if(f.on.checked&&(!cep||falta.length))return msg(m,'Para ligar a calculadora, preencha o CEP de origem e as medidas de todos os produtos.');
+  var desc=0;if(f.desc){var dv=f.desc.value.trim();desc=dv===''?0:cents(dv.replace(/^(\d+)\.(\d{1,2})$/,'$1,$2'));if(desc==null||desc<0||desc>20000)return msg(m,'Desconto no frete: valor entre R$ 0,00 e R$ 200,00.')}
   var a=await sb.from('shipping_config').update({origin_cep:cep||null,services:srv||null,updated_at:new Date().toISOString()}).eq('id',1);
   if(a.error)return msg(m,'Não foi possível salvar.');
-  var b=await sb.from('site_settings').update({ship_enabled:f.on.checked,ship_handling_days:dias,updated_at:new Date().toISOString()}).eq('id',1);
+  var up={ship_enabled:f.on.checked,ship_handling_days:dias,updated_at:new Date().toISOString()};if(f.desc)up.ship_discount_cents=desc;
+  var b=await sb.from('site_settings').update(up).eq('id',1);
   if(b.error)return msg(m,'Não foi possível salvar.');toast('Frete salvo.');go()};
  $('#stf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#stm'),cep=f.cep.value.replace(/\D/g,'');$('#str').innerHTML='';
   if(!/^\d{8}$/.test(cep))return msg(m,'Digite um CEP de destino com 8 números.');
@@ -261,7 +265,10 @@ async function vFrete(c){
    return msg(m,(d.error||'Erro.')+(d.detalhe?' '+d.detalhe:''))}
   var ops=(d&&d.opcoes)||[];if(!ops.length)return msg(m,(d&&d.aviso)||'Nenhuma opção para este CEP.');
   msg(m,'Funcionando. '+ops.length+' opções encontradas'+(S.ship_enabled?'.':' (o site ainda não mostra a calculadora: ligue-a acima).'),true);
-  $('#str').innerHTML='<table><thead><tr><th>Código</th><th>Serviço</th><th>Transportadora</th><th>Preço</th><th>Prazo</th></tr></thead><tbody>'+ops.map(function(o){return '<tr><td>'+o.id+'</td><td>'+esc(o.servico)+'</td><td>'+esc(o.transportadora)+'</td><td>'+brl(o.preco_centavos)+'</td><td>'+o.prazo_min+(o.prazo_max!==o.prazo_min?' a '+o.prazo_max:'')+' dias úteis</td></tr>'}).join('')+'</tbody></table>'}}
+  var dc=(d&&d.desconto_centavos)||0;
+  $('#str').innerHTML=(dc?'<p class="muted" style="font-size:13px;margin:0 0 10px">Desconto da loja: '+brl(dc)+' por envio. "Você paga" é o que sai do seu bolso em cada pedido.</p>':'')+
+   '<table><thead><tr><th>Código</th><th>Serviço</th><th>Transportadora</th>'+(dc?'<th>Frete real</th><th>Cliente paga</th><th>Você paga</th>':'<th>Preço</th>')+'<th>Prazo</th></tr></thead><tbody>'+ops.map(function(o){var orig=o.preco_original_centavos||o.preco_centavos;
+   return '<tr><td>'+o.id+'</td><td>'+esc(o.servico)+'</td><td>'+esc(o.transportadora)+'</td>'+(dc?'<td>'+brl(orig)+'</td><td><b>'+(o.preco_centavos?brl(o.preco_centavos):'Grátis')+'</b></td><td>'+brl(orig-o.preco_centavos)+'</td>':'<td>'+brl(o.preco_centavos)+'</td>')+'<td>'+o.prazo_min+(o.prazo_max!==o.prazo_min?' a '+o.prazo_max:'')+' dias úteis</td></tr>'}).join('')+'</tbody></table>'}}
 
 /* ---------- Marketing: pop-up, contatos e cupons ---------- */
 var ORIG={popup_boas_vindas:'Pop-up',minha_conta:'Minha conta'};

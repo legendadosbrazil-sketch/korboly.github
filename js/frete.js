@@ -29,11 +29,25 @@
       var ops = (r && r.opcoes) || [];
       if (!ops.length) { msg.textContent = (r && r.aviso) || 'Nenhuma opção de entrega para este CEP.'; return; }
       msg.textContent = ops.length + (ops.length > 1 ? ' opções' : ' opção') + ' de entrega para ' + cep.slice(0, 5) + '-' + cep.slice(5) + ':';
+      if (r.desconto_centavos > 0) {
+        var dn = document.createElement('span'); dn.className = 'frt-dc';
+        dn.textContent = 'A Korboly paga ' + brl(r.desconto_centavos) + ' do seu frete.';
+        msg.appendChild(document.createElement('br')); msg.appendChild(dn);
+      }
       ops.forEach(function (o) {
         var li = document.createElement('li');
         var a = document.createElement('span'); a.className = 'frt-s';
         a.textContent = o.servico + (o.transportadora && o.transportadora.toLowerCase() !== o.servico.toLowerCase() ? ' · ' + o.transportadora : '');
-        var b = document.createElement('span'); b.className = 'frt-p'; b.textContent = brl(o.preco_centavos);
+        var b = document.createElement('span'); b.className = 'frt-p';
+        if (o.preco_original_centavos && o.preco_original_centavos > o.preco_centavos) {
+          var del = document.createElement('s'); del.textContent = brl(o.preco_original_centavos);
+          del.setAttribute('aria-label', 'de ' + brl(o.preco_original_centavos));
+          b.appendChild(del); b.appendChild(document.createTextNode(' '));
+          var now = document.createElement('span');
+          now.textContent = o.preco_centavos === 0 ? 'Grátis' : brl(o.preco_centavos);
+          now.setAttribute('aria-label', 'por ' + now.textContent);
+          b.appendChild(now);
+        } else b.textContent = brl(o.preco_centavos);
         var c = document.createElement('span'); c.className = 'frt-d';
         c.textContent = o.prazo_min === o.prazo_max ? 'até ' + o.prazo_max + (o.prazo_max === 1 ? ' dia útil' : ' dias úteis') : o.prazo_min + ' a ' + o.prazo_max + ' dias úteis';
         li.appendChild(a); li.appendChild(b); li.appendChild(c); res.appendChild(li);

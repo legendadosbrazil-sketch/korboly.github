@@ -91,7 +91,7 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
   const fail = (detalhe: string) => out(req, 503, { error: 'Cálculo de frete indisponível no momento.', detalhe });
   let settings: any, config: any, products: any[], contact = '';
   try {
-    [settings] = await db(env, f, 'site_settings?select=ship_enabled,ship_handling_days&id=eq.1');
+    [settings] = await db(env, f, 'site_settings?select=*&id=eq.1');
     [config] = await db(env, f, 'shipping_config?select=origin_cep,services&id=eq.1');
     const list = items.map((i) => i.slug).join(',');
     products = await db(env, f, 'products?select=slug,name,price_cents,available,ship_weight_g,ship_height_cm,ship_width_cm,ship_length_cm&slug=in.(' + list + ')');
@@ -153,7 +153,13 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
     if (r.status === 401) return fail('O Melhor Envio recusou o token (expirado ou sem permissão de cálculo).');
     if (r.status === 422) {
       console.error('ME 422', txt.slice(0, 500));
-      return out(req, 400, { error: 'Não foi possível calcular para este CEP. Confira o número.' });
+      let det = '';
+      try {
+        const j = JSON.parse(txt);
+        const errs = j?.errors ? Object.entries(j.errors).map(([k, v]) => k + ': ' + (Array.isArray(v) ? v.join(' ') : String(v))) : [];
+        det = [j?.message, ...errs].filter(Boolean).join(' | ').slice(0, 400);
+      } catch { det = txt.slice(0, 200); }
+      return out(req, 400, { error: 'Não foi possível calcular para este CEP. Confira o número.', detalhe: 'Melhor Envio: ' + det });
     }
     if (!r.ok) { console.error('ME', r.status, txt.slice(0, 500)); return fail('O Melhor Envio respondeu com erro ' + r.status + '.'); }
     data = JSON.parse(txt);
@@ -163,6 +169,7 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
   }
 
   const extra = Math.max(0, Number(settings.ship_handling_days) || 0);
+  const desconto = Math.min(20000, Math.max(0, Math.trunc(Number(settings.ship_discount_cents) || 0)));
   const options = (Array.isArray(data) ? data : [])
     .filter((o: any) => o && !o.error && (o.custom_price ?? o.price) != null)
     .map((o: any) => {
@@ -175,16 +182,17 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
         id: Number(o.id),
         servico: String(o.name || ''),
         transportadora: String(o.company?.name || ''),
-        preco_centavos: Math.round(price * 100),
+        preco_original_centavos: Math.round(price * 100),
+        preco_centavos: Math.max(0, Math.round(price * 100) - desconto),
         prazo_min: min,
         prazo_max: Math.max(min, max),
       };
     })
-    .filter((o: any) => Number.isFinite(o.preco_centavos) && o.preco_centavos > 0)
+    .filter((o: any) => Number.isFinite(o.preco_original_centavos) && o.preco_original_centavos > 0)
     .sort((a: any, b: any) => a.preco_centavos - b.preco_centavos || a.prazo_max - b.prazo_max);
 
   if (!options.length) return out(req, 200, { cep, opcoes: [], aviso: 'Nenhuma opção de entrega disponível para este CEP.' });
-  return out(req, 200, { cep, opcoes: options });
+  return out(req, 200, { cep, opcoes: options, desconto_centavos: desconto });
 }
 
 declare const Deno: any;
