@@ -86,7 +86,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .cur.btn .ring{transform:scale(.55)}.cur.btn .dot{transform:scale(0)}
 .cur.open .ring{transform:scale(1.75);background:var(--ink)}.cur.open .dot{transform:scale(0)}.cur.open .tx{transform:scale(1)}
 /* detail */
-.detail{position:fixed;inset:0;z-index:60;background:var(--sheet);visibility:hidden;display:grid;grid-template-columns:1fr 1fr;gap:4vw;padding:110px 6vw 56px 7vw;overflow:hidden}
+.detail{position:fixed;inset:0;z-index:60;background:var(--sheet);visibility:hidden;display:grid;grid-template-columns:1fr 1fr;gap:4vw;padding:110px 6vw 56px 7vw;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+@media(min-width:768px){.detail .pst{position:sticky;top:110px;max-height:calc(100vh - 166px)}}
 .detail .cls{position:absolute;left:32px;top:31px;z-index:5}
 .detail .dl{position:absolute;left:0;right:0;top:0;height:84px;display:flex;align-items:center;justify-content:center}
 .dl{pointer-events:none}.dl .logo{pointer-events:none}
@@ -215,7 +216,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
-<link rel="stylesheet" href="css/site.css?v=20261117g">
+<link rel="stylesheet" href="css/site.css?v=20261117h">
 </head>
 <body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
@@ -527,13 +528,13 @@ requestAnimationFrame(frame);
 (function(){var qp=(new URLSearchParams(location.search)).get('p');if(!qp)return;var qi=-1;FILMS.forEach(function(f,i){if(f.slug===qp)qi=i});if(qi<0)return;T=qi;setTimeout(function(){T=qi;openDetail()},RM?50:900)})();
 })();
 </script>
-<script src="js/config.js?v=20261117g"></script>
-<script src="js/api.js?v=20261117g"></script>
-<script src="js/consent.js?v=20261117g"></script>
-<script src="js/welcome.js?v=20261117g" defer></script>
-<script src="js/frete.js?v=20261117g" defer></script>
-<script src="js/cart.js?v=20261117g"></script>
-<script src="js/estoque.js?v=20261117g" defer></script>
+<script src="js/config.js?v=20261117h"></script>
+<script src="js/api.js?v=20261117h"></script>
+<script src="js/consent.js?v=20261117h"></script>
+<script src="js/welcome.js?v=20261117h" defer></script>
+<script src="js/frete.js?v=20261117h" defer></script>
+<script src="js/cart.js?v=20261117h"></script>
+<script src="js/estoque.js?v=20261117h" defer></script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#d6');if(a&&window.KBCart&&a.getAttribute('data-slug')){KBCart.add(a.getAttribute('data-slug'),1)}})</script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
