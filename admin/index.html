@@ -144,10 +144,11 @@ function fProd(p,C){p=p||{};var imgs=(p.images||[]).slice();
   if(!f.name.value.trim())return msg(m,'Informe o nome.');if(price==null||price<0)return msg(m,'Preço inválido.');
   if(stock!=null&&(isNaN(stock)||stock<0))return msg(m,'Estoque inválido.');if(vol!=null&&isNaN(vol))return msg(m,'Volume inválido.');
   var row={name:f.name.value.trim(),description:f.desc.value.trim(),price_cents:price,volume_ml:vol,stock:stock,available:f.av.checked,featured:f.ft.checked,category_id:f.cat.value||null,images:imgs};
-  if(SHIPCOLS){var num=function(v){v=String(v).trim().replace(',','.');return v===''?null:Number(v)},sw=num(f.sw.value),sh=num(f.sh.value),sl=num(f.sl.value),sc=num(f.sc.value),all=[sw,sh,sl,sc],filled=all.filter(function(v){return v!=null}).length;
+  if(SHIPCOLS){var num=function(v){v=String(v).trim().toLowerCase().replace(/\s+/g,'').replace(/(cm|gramas|grama|g)$/,'');if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');v=v.replace(',','.');return v===''?null:Number(v)},
+    grams=function(v){var t=String(v).trim().toLowerCase().replace(/\s+/g,''),k=t.match(/^(\d+(?:[.,]\d+)?)(kg|quilos?)$/);return k?Math.round(parseFloat(k[1].replace(',','.'))*1000):(function(n){return n!=null&&Number.isFinite(n)&&Math.abs(n-Math.round(n))<1e-9?Math.round(n):n})(num(v))},sw=grams(f.sw.value),sh=num(f.sh.value),sl=num(f.sl.value),sc=num(f.sc.value),all=[sw,sh,sl,sc],filled=all.filter(function(v){return v!=null}).length;
    if(filled&&filled<4)return msg(m,'Frete: preencha peso e as três medidas, ou deixe todos em branco.');
-   if(filled){if(!Number.isInteger(sw)||sw<1||sw>30000)return msg(m,'Frete: peso em gramas, número inteiro entre 1 e 30000.');
-    if([sh,sl,sc].some(function(v){return !(v>=0.4&&v<=100)}))return msg(m,'Frete: medidas em cm, entre 0,4 e 100.')}
+   if(filled){if(!Number.isInteger(sw)||sw<1||sw>30000)return msg(m,'Frete: peso em gramas, só o número (ex.: 900). Também aceita 0,9 kg.');
+    if([sh,sl,sc].some(function(v){return !(v>=0.4&&v<=100)}))return msg(m,'Frete: medidas em cm, só o número (ex.: 18 ou 18,5), entre 0,4 e 100.')}
    row.ship_weight_g=sw;row.ship_height_cm=sh;row.ship_width_cm=sl;row.ship_length_cm=sc}
   var res;if(p.id)res=await sb.from('products').update(row).eq('id',p.id);else{row.slug=slugify(row.name)+'-'+Math.random().toString(36).slice(2,5);res=await sb.from('products').insert(row)}
   if(res.error)return msg(m,'Não foi possível salvar.');closeM();toast('Produto salvo.');go()}}
