@@ -49,8 +49,23 @@ Como administrar:
 - **Privacidade**: dados do controlador e texto da política (cada alteração gera nova versão). "Pedir novo consentimento" mostra o aviso de cookies de novo para todos.
 - Se um dia instalar Google Analytics, Meta Pixel etc., coloque o script com `type="text/plain" data-consent="analytics"` (ou `"marketing"`): ele só roda depois que a pessoa aceitar.
 
+## 8. Frete pelo Melhor Envio (pago pelo comprador)
+1. **Banco:** no Supabase, SQL Editor → New query → cole `supabase/003_frete_comprador.sql` → Run. Depois faça o mesmo com `supabase/004_frete_melhor_envio.sql`.
+2. **Token do Melhor Envio:** entre em melhorenvio.com.br → menu **Integrações** → **Permissões de acesso** → **Gerar novo token**. Dê o nome "Site Korboly" e marque a permissão de **cálculo de fretes** (shipping-calculate). Copie o token (ele aparece uma vez só).
+3. **Função no Supabase:** menu **Edge Functions** → **Deploy a new function** → **Via Editor**.
+   - Nome: `frete` (exatamente assim).
+   - Apague o código de exemplo, cole todo o conteúdo de `supabase/functions/frete/index.ts` e clique em **Deploy**.
+   - Na página da função, aba **Details**, desligue **Verify JWT** e salve. Isso é necessário porque o site usa a chave publicável; a segurança fica por conta da própria função.
+4. **Segredo:** Edge Functions → **Secrets** → Add new secret. Nome `MELHOR_ENVIO_TOKEN`, valor = o token do passo 2. O token nunca vai para o site nem para o GitHub.
+5. **Painel → Produtos:** em cada perfume, preencha peso (g) e medidas (cm) **já embalado para envio**.
+6. **Painel → Frete:** CEP de onde os pedidos saem e dias para preparar o envio → Salvar. Use **Testar cotação** com qualquer CEP. Se aparecerem as opções, marque **Mostrar a calculadora de frete no site** e salve.
+
+Se o teste der erro, a mensagem diz o que falta (token, CEP de origem, medidas ou a função não publicada).
+O token gerado pelo Melhor Envio tem validade. Se um dia o teste disser que o token foi recusado, gere outro e troque o segredo.
+
 ## Onde cada coisa fica
 - Site: `index.html` · Conta do cliente: `conta.html` · Painel: `admin/index.html` · FAQ: `faq.html` · Política: `privacidade.html`
+- Calculadora de frete: `js/frete.js` (site) e `supabase/functions/frete/index.ts` (servidor)
 - Aviso de cookies: `js/consent.js` · Pop-up de primeira compra: `js/welcome.js`
 - Segurança: `supabase/schema.sql` (regras RLS, funções, bloqueio de admin)
 - Variáveis: só em `js/config.js` (URL + chave anon, ambas públicas por desenho). Senhas e chaves secretas **nunca** vão para o GitHub.

@@ -21,8 +21,8 @@
         var data = null;
         try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
         if (!r.ok) {
-          var err = new Error((data && (data.message || data.msg)) || 'Erro ' + r.status);
-          err.status = r.status; err.code = data && data.code;
+          var err = new Error((data && (data.message || data.msg || data.error)) || 'Erro ' + r.status);
+          err.status = r.status; err.code = data && data.code; err.data = data;
           throw err;
         }
         return data;
@@ -36,11 +36,12 @@
   window.KBAPI = {
     ok: ok,
     get: function (path) { return req('/rest/v1/' + path); },
+    fn: function (name, body) { return req('/functions/v1/' + name, { method: 'POST', body: body || {}, timeout: 20000 }); },
     rpc: function (fn, args) { return req('/rest/v1/rpc/' + fn, { method: 'POST', body: args || {} }); },
     /* configurações públicas do site (pop-up, versão do consentimento) */
     settings: function () {
       return once('settings', function () {
-        return req('/rest/v1/site_settings?select=popup_enabled,popup_delay_seconds,popup_redisplay_days,welcome_discount_percent,welcome_coupon_valid_days,consent_version&id=eq.1')
+        return req('/rest/v1/site_settings?select=*&id=eq.1')
           .then(function (rows) { return (rows && rows[0]) || null; });
       });
     },

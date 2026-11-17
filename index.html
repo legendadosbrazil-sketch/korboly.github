@@ -238,6 +238,14 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 <div class="m"><span class="d4" id="d4"></span></div>
 
 <div class="m"><a class="buy lbl" id="d6" href="#">Comprar</a></div>
+<div class="frt" id="frt" hidden>
+<form novalidate><label for="frt-cep" class="lbl">Calcular frete</label>
+<div class="frt-row"><input id="frt-cep" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" aria-describedby="frt-msg"><button type="submit" class="lbl">Calcular</button></div>
+<a class="frt-nao" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a>
+</form>
+<p id="frt-msg" role="status" aria-live="polite"></p>
+<ul id="frt-res"></ul>
+</div>
 </div>
 <div class="pst" aria-hidden="true">
 <svg viewBox="0 0 474 900" preserveAspectRatio="xMidYMid meet">
@@ -256,9 +264,9 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 (function(){
 var IMG="img/dark-luxury.webp";var IMG_E="img/evora.webp";var IMG_H="img/haitz.webp";
 var FILMS=[
-{id:'dark',name:'Dark Luxury',vol:'100 ML',price:'R$ 229,90',url:'#contato',photo:IMG},
-{id:'evora',name:'Évora',vol:'60 ML',price:'R$ 169,90',url:'#contato',photo:IMG_E},
-{id:'haitz',name:'Haitz',vol:'60 ML',price:'R$ 179,90',url:'#contato',photo:IMG_H}
+{id:'dark',slug:'dark-luxury',name:'Dark Luxury',vol:'100 ML',price:'R$ 229,90',url:'#contato',photo:IMG},
+{id:'evora',slug:'evora',name:'Évora',vol:'60 ML',price:'R$ 169,90',url:'#contato',photo:IMG_E},
+{id:'haitz',slug:'haitz',name:'Haitz',vol:'60 ML',price:'R$ 179,90',url:'#contato',photo:IMG_H}
 ];
 var DESC='[Descrição sensorial curta]';
 var N=FILMS.length,COPIES=1,M=N*COPIES;
@@ -421,7 +429,7 @@ function inset(r){return 'inset('+r.top+'px '+(innerWidth-r.right)+'px '+(innerH
 function openDetail(){
 if(isOpen)return;isOpen=true;T=Math.round(T);document.body.style.overflow='hidden';
 var f=FILMS[active];
-$('d1').textContent=f.vol+' / Korboly';$('d2').textContent=f.name;$('d3').textContent=f.vol+' / '+f.price;$('d4').textContent=DESC;$('d6').textContent='Comprar';$('d6').href=f.url;
+$('d1').textContent=f.vol+' / Korboly';$('d2').textContent=f.name;$('d3').textContent=f.vol+' / '+f.price;$('d4').textContent=DESC;$('d6').textContent='Comprar';$('d6').href=f.url;if($('frt'))$('frt').setAttribute('data-slug',f.slug);
 var im=$('pimg'),ph=$('pph');
 if(f.photo){im.setAttribute('href',f.photo);im.style.display='';ph.textContent=''}else{im.removeAttribute('href');im.style.display='none';ph.textContent='[Foto real do frasco: '+f.name+']'}
 circles.forEach(function(c){c.setAttribute('r',0)});
@@ -471,6 +479,7 @@ requestAnimationFrame(frame);
 <script src="js/api.js"></script>
 <script src="js/consent.js"></script>
 <script src="js/welcome.js" defer></script>
+<script src="js/frete.js" defer></script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
 </html>
