@@ -428,6 +428,28 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
 
   try {
     if (body.action === 'checkout') return await checkout(req, env, f, body);
+    if (body.action === 'diagnostico') {
+      if (!(await isAdmin(req, env, f))) throw new HttpError(403, { error: 'Só administradores.' });
+      if (!env.MP_ACCESS_TOKEN) throw new HttpError(503, { error: 'Falta o MP_ACCESS_TOKEN nos segredos da função.' });
+      const h = { Authorization: 'Bearer ' + env.MP_ACCESS_TOKEN };
+      const [pm, me] = await Promise.all([
+        f('https://api.mercadopago.com/v1/payment_methods', { headers: h }),
+        f('https://api.mercadopago.com/users/me', { headers: h }),
+      ]);
+      if (pm.status === 401 || me.status === 401) throw new HttpError(400, { error: 'O Mercado Pago recusou o MP_ACCESS_TOKEN. Copie de novo o Access Token de PRODUÇÃO.' });
+      const list = pm.ok ? await pm.json() : [];
+      const u = me.ok ? await me.json() : {};
+      return out(req, 200, {
+        conta: {
+          id: u.id, apelido: u.nickname, tipo: u.user_type, situacao: u.status?.site_status,
+          vender: u.status?.sell?.allow, motivos_venda: u.status?.sell?.codes, etiquetas: u.tags,
+        },
+        meios: (Array.isArray(list) ? list : []).map((m: any) => ({
+          id: m.id, nome: m.name, tipo: m.payment_type_id, status: m.status,
+          minimo: m.min_allowed_amount, maximo: m.max_allowed_amount,
+        })),
+      });
+    }
     if (body.action === 'sincronizar') {
       const user = await currentUser(req, env, f);
       if (!user) throw new HttpError(401, { error: 'Entre na sua conta.' });

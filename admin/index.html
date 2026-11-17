@@ -248,7 +248,8 @@ async function vFrete(c){
  '<div class="panel sec"><h3 class="lbl muted">Testar cotação</h3><form id="stf" novalidate style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'+
   '<label class="fld" style="margin:0;flex:1;min-width:140px"><span class="lbl">CEP de destino</span><input name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000"></label>'+
   '<label class="fld" style="margin:0;flex:1;min-width:160px"><span class="lbl">Produto</span><select name="p">'+P.filter(function(p){return p.available}).map(function(p){return '<option value="'+esc(p.slug)+'">'+esc(p.name)+'</option>'}).join('')+'</select></label>'+
-  '<button class="btn solid">Calcular</button></form><p class="msg" id="stm" style="margin-top:14px"></p><div id="str"></div></div>';
+  '<button class="btn solid">Calcular</button></form><p class="msg" id="stm" style="margin-top:14px"></p><div id="str"></div></div>'+
+ '<div class="panel sec"><h3 class="lbl muted">Mercado Pago</h3><p class="muted" style="font-size:13px;margin:0 0 14px">Pergunta ao Mercado Pago quais formas de pagamento estão liberadas na sua conta (Pix, cartão, boleto) e se há alguma restrição.</p><button class="btn" id="mpd">Verificar formas de pagamento</button><p class="msg" id="mpm" style="margin-top:14px"></p><div id="mpr"></div></div>';
  var mask=function(i){i.oninput=function(){var d=i.value.replace(/\D/g,'').slice(0,8);i.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d}};
  mask($('#shf').cep);mask($('#stf').cep);
  $('#shf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#shm'),cep=f.cep.value.replace(/\D/g,''),dias=intIn(f.dias.value.trim()||'0',0,30),srv=f.srv.value.replace(/\s/g,'');
@@ -262,6 +263,15 @@ async function vFrete(c){
   var up={ship_enabled:f.on.checked,ship_handling_days:dias,updated_at:new Date().toISOString()};if(f.desc)up.ship_discount_cents=desc;
   var b=await sb.from('site_settings').update(up).eq('id',1);
   if(b.error)return msg(m,'Não foi possível salvar.');toast('Frete salvo.');go()};
+ $('#mpd').onclick=async function(){var m=$('#mpm');$('#mpr').innerHTML='';msg(m,'Consultando…',true);
+  var res=await sb.functions.invoke((window.KORBOLY&&(window.KORBOLY.LOJA_FUNCTION||window.KORBOLY.FRETE_FUNCTION))||'loja',{body:{action:'diagnostico'}}),d=res.data;
+  if(res.error){try{d=res.error.context&&res.error.context.json?await res.error.context.json():null}catch(x){d=null}return msg(m,d&&d.error?d.error:'A função não respondeu. Confira se o código novo foi publicado.')}
+  if(!d||!d.meios||!d.meios.length){msg(m,'O Mercado Pago não informou nenhuma forma de pagamento.');}else msg(m,'Resposta do Mercado Pago:',true);
+  var c=d.conta||{},TIP={credit_card:'Cartão de crédito',debit_card:'Cartão de débito',bank_transfer:'Pix / transferência',ticket:'Boleto',account_money:'Saldo Mercado Pago',digital_currency:'Linha de crédito',prepaid_card:'Cartão pré-pago',atm:'Lotérica / caixa'};
+  var pix=(d.meios||[]).filter(function(x){return x.id==='pix'})[0];
+  $('#mpr').innerHTML='<p style="font-size:14px;margin:0 0 10px"><b>Pix:</b> '+(pix?(pix.status==='active'?'<span class="tag ok">liberado</span>':'<span class="tag err">'+esc(pix.status)+'</span>')+(pix.minimo!=null?' · valor mínimo '+brl(Math.round(pix.minimo*100)):''):'<span class="tag err">não está liberado nesta conta</span>')+'</p>'+
+   '<p class="muted" style="font-size:13px;margin:0 0 12px">Conta '+esc(String(c.apelido||c.id||''))+(c.situacao?' · situação: '+esc(c.situacao):'')+(c.vender===false?' · <b>vendas bloqueadas</b>':'')+(c.motivos_venda&&c.motivos_venda.length?' ('+esc(c.motivos_venda.join(', '))+')':'')+'</p>'+
+   '<table><thead><tr><th>Forma</th><th>Tipo</th><th>Situação</th><th>Mínimo</th></tr></thead><tbody>'+(d.meios||[]).map(function(x){return '<tr><td>'+esc(x.nome||x.id)+'</td><td>'+esc(TIP[x.tipo]||x.tipo)+'</td><td>'+(x.status==='active'?'<span class="tag ok">ativo</span>':'<span class="tag">'+esc(x.status)+'</span>')+'</td><td>'+(x.minimo!=null?brl(Math.round(x.minimo*100)):'—')+'</td></tr>'}).join('')+'</tbody></table>'};
  $('#stf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#stm'),cep=f.cep.value.replace(/\D/g,'');$('#str').innerHTML='';
   if(!/^\d{8}$/.test(cep))return msg(m,'Digite um CEP de destino com 8 números.');
   msg(m,'Calculando…',true);
