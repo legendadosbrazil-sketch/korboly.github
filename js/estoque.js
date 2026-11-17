@@ -43,12 +43,26 @@
   }
 
   function load() {
-    return window.KBAPI.get('products?select=slug,name,stock,available').then(function (rows) {
+    return window.KBAPI.get('products?select=slug,name,stock,available,description,price_cents,volume_ml').then(function (rows) {
       var before = JSON.stringify(STOCK); STOCK = {};
-      (rows || []).forEach(function (r) { STOCK[r.slug] = { stock: r.stock, available: r.available }; NAMES[r.slug] = r.name; });
-      loaded = true;
+      var prod = {};
+      (rows || []).forEach(function (r) { STOCK[r.slug] = { stock: r.stock, available: r.available }; NAMES[r.slug] = r.name; prod[r.slug] = r; });
+      var changed = JSON.stringify(prod) !== JSON.stringify(window.KBPROD || null);
+      window.KBPROD = prod; loaded = true;
+      if (changed) { cards(); try { window.dispatchEvent(new CustomEvent('kb:products')); } catch (e) { /* */ } }
       if (JSON.stringify(STOCK) !== before) paint(); else detail();
     }).catch(function () { /* sem conexão: mantém o último estado; a compra é barrada no servidor */ });
+  }
+  function brl(c) { return (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\u00a0/g, ' '); }
+  // textos dos cards ("Escolha a sua") com os dados do painel
+  function cards() {
+    [].forEach.call(document.querySelectorAll('.pc[data-slug]'), function (a) {
+      var p = window.KBPROD[a.getAttribute('data-slug')]; if (!p) return;
+      var h = a.querySelector('.pct h3'), t = a.querySelector('.pct p');
+      if (h && p.name) h.textContent = p.name;
+      if (t && p.price_cents != null) t.textContent = (p.volume_ml ? p.volume_ml + ' ML · ' : '') + brl(p.price_cents);
+      var im = a.querySelector('.pci img'); if (im && p.name) im.alt = 'Frasco ' + p.name;
+    });
   }
   function schedule() { clearTimeout(timer); timer = setTimeout(function () { if (!document.hidden) load(); schedule(); }, 60000); }
 

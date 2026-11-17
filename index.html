@@ -95,7 +95,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .d1{color:var(--accent)}
 .d2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,5.4vw,84px);line-height:1;letter-spacing:-.025em}
 .d3{color:var(--muted)}
-.d4{font-family:"Cormorant Garamond",serif;font-size:19px;line-height:1.5;max-width:42ch;color:var(--ink)}
+.d4{font-family:"Cormorant Garamond",serif;font-size:19px;line-height:1.5;max-width:42ch;color:var(--ink);white-space:pre-line}
+.d4:empty{display:none}
 .d5{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16px;color:var(--muted)}
 .buy{display:inline-flex;align-items:center;height:44px;padding:0 20px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);margin-top:10px;transition:background .25s,color .25s}
 .buy:hover{background:var(--accent);border-color:var(--accent)}
@@ -214,7 +215,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
-<link rel="stylesheet" href="css/site.css?v=20261117e">
+<link rel="stylesheet" href="css/site.css?v=20261117f">
 </head>
 <body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
@@ -298,7 +299,13 @@ var FILMS=[
 {id:'evora',slug:'evora',name:'Évora',vol:'60 ML',price:'R$ 169,90',url:'#contato',photo:IMG_E},
 {id:'haitz',slug:'haitz',name:'Haitz',vol:'60 ML',price:'R$ 179,90',url:'#contato',photo:IMG_H}
 ];
-var DESC='[Descrição sensorial curta]';
+var DESC='';
+/* dados do produto vindos do painel (nome, volume, preço e descrição); sem conexão, usa os textos fixos */
+function info(f){var p=window.KBPROD&&window.KBPROD[f.slug];if(!p)return {name:f.name,vol:f.vol,price:f.price,desc:DESC};
+ return {name:p.name||f.name,vol:p.volume_ml?p.volume_ml+' ML':f.vol,price:p.price_cents!=null?(p.price_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}).replace(/\u00a0/g,' '):f.price,desc:(p.description||'').trim()||DESC}}
+window.addEventListener('kb:products',function(){var f=FILMS[active],i=info(f);
+ [['c1',i.name],['c2',i.vol+' / '+i.price]].forEach(function(x){var el=$(x[0]);if(el){el.innerHTML='';var sp=document.createElement('span');sp.textContent=x[1];el.appendChild(sp)}});
+ if(isOpen){$('d1').textContent=i.vol+' / Korboly';$('d2').textContent=i.name;$('d3').textContent=i.vol+' / '+i.price;$('d4').textContent=i.desc}});
 var N=FILMS.length,COPIES=1,M=N*COPIES;
 var RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
 var $=function(i){return document.getElementById(i)};
@@ -358,7 +365,7 @@ a.onfinish=function(){x.remove()};
 }
 function setActive(i,dir){
 active=i;var f=FILMS[i];
-swap($('c1'),f.name,dir);swap($('c2'),f.vol+' / '+f.price,dir);swap($('c3'),window.KBSHIP||'Envio para todo o Brasil',dir);
+var fi=info(f);swap($('c1'),fi.name,dir);swap($('c2'),fi.vol+' / '+fi.price,dir);swap($('c3'),window.KBSHIP||'Envio para todo o Brasil',dir);
 tabEls.forEach(function(t,k){t.classList.toggle('on',k===i)});placeInd();
 }
 function goTo(i){
@@ -395,15 +402,28 @@ if(isOpen||Math.abs(e.deltaX)<=Math.abs(e.deltaY))return;
 var dl=e.deltaX;
 T+=dl/(ws+gap)*.5;clearTimeout(wheelTimer);wheelTimer=setTimeout(function(){T=Math.round(T)},160);
 },{passive:true});
-var sx0=0,T0=0,down=false;
-shelf.addEventListener('pointerdown',function(e){down=true;wasDrag=false;sx0=e.clientX;T0=T});
+var sx0=0,sy0=0,T0=0,down=false,pid=null,t0d=0;
+function stepPx(){return Math.max(60,d*1.14)}
+function endDrag(e){
+if(!down)return;
+if(dragging){
+var dx=((e&&e.clientX!=null)?e.clientX:sx0)-sx0,dt=Math.max(1,performance.now()-t0d),base=Math.round(T0);
+var n=Math.round(Math.abs(dx)/stepPx());
+if(n===0&&(Math.abs(dx)>35||Math.abs(dx)/dt>.35))n=1;
+T=base-(dx<0?-1:1)*Math.min(n,2);
+}else T=Math.round(T);
+down=false;dragging=false;pid=null;setTimeout(function(){wasDrag=false},0)}
+shelf.addEventListener('pointerdown',function(e){if(!e.isPrimary||isOpen)return;down=true;wasDrag=false;pid=e.pointerId;sx0=e.clientX;sy0=e.clientY;T0=Math.round(T);t0d=performance.now()});
 addEventListener('pointermove',function(e){
 mx=e.clientX;my=e.clientY;
-if(down){var dx=e.clientX-sx0;if(!dragging&&Math.abs(dx)>5){dragging=true;wasDrag=true}if(dragging)T=T0-dx/(ws+gap)}
+if(down&&e.pointerId===pid){var dx=e.clientX-sx0,dy=e.clientY-sy0;
+if(!dragging&&Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){dragging=true;wasDrag=true}
+if(dragging)T=T0-dx/stepPx()}
 });
-addEventListener('pointerup',function(){if(dragging){T=Math.round(T)}down=false;dragging=false;setTimeout(function(){wasDrag=false},0)});
-addEventListener('pointercancel',function(){down=false;dragging=false});
+addEventListener('pointerup',function(e){if(e.pointerId===pid)endDrag(e)});
+addEventListener('pointercancel',function(e){if(e.pointerId===pid)endDrag(null)});
 addEventListener('resize',measure);
+shelf.addEventListener('touchmove',function(e){if(dragging&&e.cancelable)e.preventDefault()},{passive:false});
 document.addEventListener('pointerover',function(e){
 var b=e.target.closest&&e.target.closest('button,a');
 cur.classList.toggle('btn',!!b&&!b.closest('#shelf'));
@@ -458,8 +478,8 @@ function coverRect(){var t=tapes.filter(function(x){return Math.abs(x.r)<.5})[0]
 function inset(r){return 'inset('+r.top+'px '+(innerWidth-r.right)+'px '+(innerHeight-r.bottom)+'px '+r.left+'px round 3px)'}
 function openDetail(){
 if(isOpen)return;isOpen=true;T=Math.round(T);document.body.style.overflow='hidden';
-var f=FILMS[active];
-$('d1').textContent=f.vol+' / Korboly';$('d2').textContent=f.name;$('d3').textContent=f.vol+' / '+f.price;$('d4').textContent=DESC;$('d6').textContent='Comprar';$('d6').href='checkout.html';$('d6').setAttribute('data-slug',f.slug);if($('frt'))$('frt').setAttribute('data-slug',f.slug);
+var ti=((T%N)+N)%N;if(ti!==active)setActive(ti,1);var f=FILMS[ti];
+var fi=info(f);$('d1').textContent=fi.vol+' / Korboly';$('d2').textContent=fi.name;$('d3').textContent=fi.vol+' / '+fi.price;$('d4').textContent=fi.desc;$('d6').textContent='Comprar';$('d6').href='checkout.html';$('d6').setAttribute('data-slug',f.slug);if($('frt'))$('frt').setAttribute('data-slug',f.slug);
 var im=$('pimg'),ph=$('pph');
 if(f.photo){im.setAttribute('href',f.photo);im.style.display='';ph.textContent=''}else{im.removeAttribute('href');im.style.display='none';ph.textContent='[Foto real do frasco: '+f.name+']'}
 circles.forEach(function(c){c.setAttribute('r',0)});
@@ -501,18 +521,18 @@ measure();
 document.fonts&&document.fonts.ready.then(measure);
 setActive(active,1);
 $('c1').innerHTML='';$('c2').innerHTML='';$('c3').innerHTML='';
-(function(){var f=FILMS[active];[['c1',f.name],['c2',f.vol+' / '+f.price],['c3',window.KBSHIP||'Envio para todo o Brasil']].forEach(function(p){var sp=document.createElement('span');sp.textContent=p[1];$(p[0]).innerHTML='';$(p[0]).appendChild(sp)})})();
+(function(){var f=FILMS[active],fi=info(f);[['c1',fi.name],['c2',fi.vol+' / '+fi.price],['c3',window.KBSHIP||'Envio para todo o Brasil']].forEach(function(p){var sp=document.createElement('span');sp.textContent=p[1];$(p[0]).innerHTML='';$(p[0]).appendChild(sp)})})();
 requestAnimationFrame(frame);
 (function(){var qp=(new URLSearchParams(location.search)).get('p');if(!qp)return;var qi=-1;FILMS.forEach(function(f,i){if(f.slug===qp)qi=i});if(qi<0)return;T=qi;setTimeout(function(){T=qi;openDetail()},RM?50:900)})();
 })();
 </script>
-<script src="js/config.js?v=20261117e"></script>
-<script src="js/api.js?v=20261117e"></script>
-<script src="js/consent.js?v=20261117e"></script>
-<script src="js/welcome.js?v=20261117e" defer></script>
-<script src="js/frete.js?v=20261117e" defer></script>
-<script src="js/cart.js?v=20261117e"></script>
-<script src="js/estoque.js?v=20261117e" defer></script>
+<script src="js/config.js?v=20261117f"></script>
+<script src="js/api.js?v=20261117f"></script>
+<script src="js/consent.js?v=20261117f"></script>
+<script src="js/welcome.js?v=20261117f" defer></script>
+<script src="js/frete.js?v=20261117f" defer></script>
+<script src="js/cart.js?v=20261117f"></script>
+<script src="js/estoque.js?v=20261117f" defer></script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#d6');if(a&&window.KBCart&&a.getAttribute('data-slug')){KBCart.add(a.getAttribute('data-slug'),1)}})</script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
