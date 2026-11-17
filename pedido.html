@@ -79,7 +79,7 @@ function render(o){
   '<div class="ln"><span class="m">Frete'+(o.shipping_service?' ('+esc(o.shipping_service)+')':'')+'</span><span>'+(o.shipping_cents?brl(o.shipping_cents):'Grátis')+'</span></div>'+
   '<div class="ln t"><span>Total</span><span>'+brl(o.total_cents)+'</span></div></div>'+
   '<div class="card"><h2 class="lbl muted" style="margin:0 0 10px">Entrega</h2><p style="margin:0;font-size:14px;line-height:1.6">'+esc(a.recipient||o.customer_name)+'<br>'+esc(a.street||'')+', '+esc(a.number||'')+(a.complement?' – '+esc(a.complement):'')+'<br>'+esc(a.district||'')+' · '+esc(a.city||'')+'/'+esc(a.state||'')+' · CEP '+esc(String(a.zip||'').replace(/^(\d{5})(\d{3})$/,'$1-$2'))+'</p>'+
-  (o.tracking_code?'<p style="margin:12px 0 0;font-size:14px">Código de rastreio: <b>'+esc(o.tracking_code)+'</b></p>':'')+'</div>'+
+  (o.tracking_code?'<p style="margin:12px 0 0;font-size:14px">Código de rastreio: <b>'+esc(o.tracking_code)+'</b></p><a class="btn solid sm" style="margin-top:12px" target="_blank" rel="noopener" href="https://www.melhorrastreio.com.br/rastreio/'+encodeURIComponent(o.tracking_code)+'">Acompanhar entrega ↗</a>':'')+'</div>'+
   '<div class="acts"><a class="btn" href="conta.html">Ver todos os pedidos</a><a class="btn" href="index.html">Voltar à loja</a></div>'}
 load();
 })();
