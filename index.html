@@ -110,7 +110,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .c1{font-size:24px;height:28px}
 .arr.l{left:6px}.arr.r{right:6px}
 .foot{left:16px;right:16px;bottom:18px}.foot .lbl{font-size:9px}
-.detail{grid-template-columns:1fr;padding:84px 22px 40px;gap:24px;overflow-y:auto}
+.detail{grid-template-columns:1fr;padding:84px 22px 40px;gap:24px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .detail .dl{height:64px}.detail .cls{left:16px;top:21px}
 .pst{order:-1;height:46svh;width:auto}
 .d2{font-size:42px}.d4{font-size:17px}
@@ -215,7 +215,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
-<link rel="stylesheet" href="css/site.css?v=20261117f">
+<link rel="stylesheet" href="css/site.css?v=20261117g">
 </head>
 <body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
@@ -488,7 +488,8 @@ detail.style.visibility='visible';detail.style.transformOrigin=cxp+'px '+cyp+'px
 var D=RM?1:1050,E='cubic-bezier(.76,0,.18,1)';
 if(detAnim)detAnim.cancel();
 detAnim=detail.animate([{clipPath:inset(r),transform:'rotate(-2.5deg)'},{clipPath:'inset(0px 0px 0px 0px round 0px)',transform:'rotate(0deg)'}],{duration:D,easing:E,fill:'both'});
-masks.forEach(function(m,i){m.getAnimations().forEach(function(a){a.cancel()});m.animate([{transform:'translateY(110%)'},{transform:'translateY(0)'}],{duration:RM?1:900,delay:RM?0:620+i*75,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'})});
+(function(a){a.onfinish=function(){if(isOpen&&detAnim===a){a.cancel();detAnim=null}}})(detAnim);
+masks.forEach(function(m,i){m.getAnimations().forEach(function(a){a.cancel()});var ma=m.animate([{transform:'translateY(110%)'},{transform:'translateY(0)'}],{duration:RM?1:900,delay:RM?0:620+i*75,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'});ma.onfinish=function(){if(isOpen)ma.cancel()}});
 var t0=performance.now()+(RM?-5000:520);cancelAnimationFrame(inkRaf);
 (function ink(now){
 var el=now-t0,done=true;
@@ -526,13 +527,13 @@ requestAnimationFrame(frame);
 (function(){var qp=(new URLSearchParams(location.search)).get('p');if(!qp)return;var qi=-1;FILMS.forEach(function(f,i){if(f.slug===qp)qi=i});if(qi<0)return;T=qi;setTimeout(function(){T=qi;openDetail()},RM?50:900)})();
 })();
 </script>
-<script src="js/config.js?v=20261117f"></script>
-<script src="js/api.js?v=20261117f"></script>
-<script src="js/consent.js?v=20261117f"></script>
-<script src="js/welcome.js?v=20261117f" defer></script>
-<script src="js/frete.js?v=20261117f" defer></script>
-<script src="js/cart.js?v=20261117f"></script>
-<script src="js/estoque.js?v=20261117f" defer></script>
+<script src="js/config.js?v=20261117g"></script>
+<script src="js/api.js?v=20261117g"></script>
+<script src="js/consent.js?v=20261117g"></script>
+<script src="js/welcome.js?v=20261117g" defer></script>
+<script src="js/frete.js?v=20261117g" defer></script>
+<script src="js/cart.js?v=20261117g"></script>
+<script src="js/estoque.js?v=20261117g" defer></script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#d6');if(a&&window.KBCart&&a.getAttribute('data-slug')){KBCart.add(a.getAttribute('data-slug'),1)}})</script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
