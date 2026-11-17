@@ -199,7 +199,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/site.css?v=20261117b">
 </head>
 <body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
@@ -475,11 +475,11 @@ $('c1').innerHTML='';$('c2').innerHTML='';$('c3').innerHTML='';
 requestAnimationFrame(frame);
 })();
 </script>
-<script src="js/config.js"></script>
-<script src="js/api.js"></script>
-<script src="js/consent.js"></script>
-<script src="js/welcome.js" defer></script>
-<script src="js/frete.js" defer></script>
+<script src="js/config.js?v=20261117b"></script>
+<script src="js/api.js?v=20261117b"></script>
+<script src="js/consent.js?v=20261117b"></script>
+<script src="js/welcome.js?v=20261117b" defer></script>
+<script src="js/frete.js?v=20261117b" defer></script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
 </html>
