@@ -173,6 +173,16 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 }
 @media(prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}}
 .pb{padding:0}.pbl{display:block}.pbl img{display:block;width:100%;height:auto}
+.bf{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.bfl{list-style:none;margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(3,1fr);max-width:1080px}
+.bfi{display:flex;align-items:center;justify-content:center;gap:18px;padding:30px clamp(12px,2.5vw,32px);position:relative}
+.bfi+.bfi::before{content:"";position:absolute;left:0;top:50%;height:40px;margin-top:-20px;width:1px;background:var(--line2)}
+.bfc{flex:none;width:34px;height:34px;fill:none;stroke:var(--ink);stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s,transform .6s var(--ease)}
+.bfi:hover .bfc{stroke:var(--accent);transform:translateY(-2px)}
+.bfi strong{display:block;font:600 11px/1.2 "Inter Tight",system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.bfi span{display:block;margin-top:6px;font-size:13.5px;line-height:1.35;color:var(--muted)}
+@media(max-width:860px){.bfi{flex-direction:column;text-align:center;gap:12px;padding:26px 10px}.bfi strong{font-size:10px;letter-spacing:.12em}.bfi span{font-size:12.5px}.bfc{width:30px;height:30px}}
+@media(max-width:520px){.bfl{grid-template-columns:1fr}.bfi{flex-direction:row;justify-content:flex-start;text-align:left;gap:16px;padding:18px 4px}.bfi+.bfi::before{left:0;right:0;top:0;width:auto;height:1px;margin:0}.bfi strong{font-size:10.5px}}
 .pr{padding:clamp(56px,8vw,104px) 0 clamp(64px,9vw,120px);background:var(--alt)}
 .prh{display:flex;justify-content:space-between;align-items:flex-end;gap:20px 32px;flex-wrap:wrap;margin-bottom:clamp(28px,4vw,48px)}
 .prh h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(40px,5vw,68px);line-height:1;margin:0}
@@ -199,7 +209,7 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 .bnt h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,6vw,84px);line-height:1;margin:0 0 36px}
 @media(max-width:767px){.g2{grid-template-columns:1fr}.bnp{width:70%;opacity:.55}}
 </style>
-<link rel="stylesheet" href="css/site.css?v=20261117d">
+<link rel="stylesheet" href="css/site.css?v=20261117e">
 </head>
 <body data-welcome>
 <section class="hero" id="hero"><div class="glow"></div>
@@ -221,7 +231,12 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 
 <main id="mais">
 <section class="pb"><a class="pbl rv" href="#mais" aria-label="Ver a coleção Korboly"><img src="img/banner.webp" width="1800" height="658" alt="Korboly: Dark Luxury, Évora e Haitz" loading="lazy" decoding="async"></a></section>
-<section class="pr"><div class="w"><div class="prh"><h2 class="rv">Escolha a sua.</h2><a class="cta lbl rv" href="#mais" style="margin:0">Ver o catálogo</a></div><div class="prg"><a class="pc rv" style="transition-delay:0.0s" href="#hero" data-film="0"><div class="pci"><img src="img/dark-luxury.webp" alt="Frasco Dark Luxury" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Dark Luxury</h3><p>100 ML · R$ 229,90</p></div></a><a class="pc rv" style="transition-delay:0.1s" href="#hero" data-film="1"><div class="pci"><img src="img/evora.webp" alt="Frasco Évora" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Évora</h3><p>60 ML · R$ 169,90</p></div></a><a class="pc rv" style="transition-delay:0.2s" href="#hero" data-film="2"><div class="pci"><img src="img/haitz.webp" alt="Frasco Haitz" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Haitz</h3><p>60 ML · R$ 179,90</p></div></a></div></div></section>
+<section class="bf" aria-label="Por que comprar na Korboly"><div class="w"><ul class="bfl">
+<li class="bfi rv"><svg class="bfc" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5 26.5 7.5v8c0 6.6-4.4 11.3-10.5 13.5C9.9 26.8 5.5 22.1 5.5 15.5v-8z"/><path d="m11.5 16 3.2 3.2 6-6.4"/></svg><div><strong>Compra segura</strong><span>Seus dados protegidos</span></div></li>
+<li class="bfi rv" style="transition-delay:.08s"><svg class="bfc" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="8" width="24" height="16" rx="1.5"/><path d="M4 13h24"/><path d="M8.5 19.5h5"/></svg><div><strong>Pagamento flexível</strong><span>Diversas formas de pagamento</span></div></li>
+<li class="bfi rv" style="transition-delay:.16s"><svg class="bfc" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l5 6.5L16 27 4 12.5z"/><path d="M4 12.5h24"/><path d="M12.5 6 10.5 12.5 16 27l5.5-14.5L19.5 6"/></svg><div><strong>Qualidade premium</strong><span>Perfumes de alta performance</span></div></li>
+</ul></div></section>
+<section class="pr"><div class="w"><div class="prh"><h2 class="rv">Escolha a sua.</h2><a class="cta lbl rv" href="#mais" style="margin:0">Ver o catálogo</a></div><div class="prg"><a class="pc rv" style="transition-delay:0.0s" href="#hero" data-film="0" data-slug="dark-luxury"><div class="pci"><img src="img/dark-luxury.webp" alt="Frasco Dark Luxury" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Dark Luxury</h3><p>100 ML · R$ 229,90</p></div></a><a class="pc rv" style="transition-delay:0.1s" href="#hero" data-film="1" data-slug="evora"><div class="pci"><img src="img/evora.webp" alt="Frasco Évora" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Évora</h3><p>60 ML · R$ 169,90</p></div></a><a class="pc rv" style="transition-delay:0.2s" href="#hero" data-film="2" data-slug="haitz"><div class="pci"><img src="img/haitz.webp" alt="Frasco Haitz" width="640" height="1137" loading="lazy" decoding="async"></div><div class="pct"><h3>Haitz</h3><p>60 ML · R$ 179,90</p></div></a></div></div></section>
 </main>
 <footer class="pgf" id="contato"><div class="w">
 <div><div class="logo flog"><img src="img/logo.svg" alt="Korboly" width="715" height="160"></div><p class="mu" style="font-size:12px;margin-top:14px">© Korboly. Todos os direitos reservados.</p></div>
@@ -238,6 +253,17 @@ details .mu a,.ul{border-bottom:1px solid var(--muted)}
 <div class="m"><span class="d4" id="d4"></span></div>
 
 <div class="m"><a class="buy lbl" id="d6" href="#">Comprar</a></div>
+<div class="oos" id="oos" hidden>
+<p class="oos-h"><span class="kb-out-tag">Esgotado</span><span>Este perfume está temporariamente indisponível.</span></p>
+<button type="button" class="buy lbl oos-b" id="oos-b" aria-expanded="false" aria-controls="oos-f">Me avise quando voltar</button>
+<form class="oos-f" id="oos-f" hidden novalidate>
+<label for="oos-e" class="lbl">Seu e-mail</label>
+<div class="frt-row"><input id="oos-e" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="voce@email.com" required aria-describedby="oos-n oos-m"><button type="submit" class="lbl">Avisar-me</button></div>
+<input type="text" name="empresa" id="oos-hp" tabindex="-1" autocomplete="off" aria-hidden="true" class="oos-hp">
+<p class="oos-n" id="oos-n">Usaremos seu e-mail só para enviar um único aviso quando este perfume voltar ao estoque. Nada de ofertas por esse cadastro. Veja a <a href="privacidade.html">Política de Privacidade</a>.</p>
+</form>
+<p class="oos-m" id="oos-m" role="status" aria-live="polite"></p>
+</div>
 <div class="frt" id="frt" hidden>
 <form novalidate><label for="frt-cep" class="lbl">Calcular frete</label>
 <div class="frt-row"><input id="frt-cep" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" aria-describedby="frt-msg"><button type="submit" class="lbl">Calcular</button></div>
@@ -295,7 +321,7 @@ var tapes=[];
 for(var v=0;v<M;v++){
 var f=FILMS[v%N];
 var el=document.createElement('div');el.className='tape';
-var cv=document.createElement('div');cv.className='pl';
+var cv=document.createElement('div');cv.className='pl';cv.setAttribute('data-slug',f.slug);
 if(f.photo){cv.style.backgroundImage='url('+f.photo+')';cv.setAttribute('role','img');cv.setAttribute('aria-label',f.name)}else{cv.textContent='[Foto real do frasco: '+f.name+']'}
 el.appendChild(cv);stage.appendChild(el);
 tapes.push({el:el,cv:cv,v:v,film:v%N,lift:0,liftT:0,r:0});
@@ -473,14 +499,16 @@ setActive(active,1);
 $('c1').innerHTML='';$('c2').innerHTML='';$('c3').innerHTML='';
 (function(){var f=FILMS[active];[['c1',f.name],['c2',f.vol+' / '+f.price],['c3',window.KBSHIP||'Envio para todo o Brasil']].forEach(function(p){var sp=document.createElement('span');sp.textContent=p[1];$(p[0]).innerHTML='';$(p[0]).appendChild(sp)})})();
 requestAnimationFrame(frame);
+(function(){var qp=(new URLSearchParams(location.search)).get('p');if(!qp)return;var qi=-1;FILMS.forEach(function(f,i){if(f.slug===qp)qi=i});if(qi<0)return;T=qi;setTimeout(function(){T=qi;openDetail()},RM?50:900)})();
 })();
 </script>
-<script src="js/config.js?v=20261117d"></script>
-<script src="js/api.js?v=20261117d"></script>
-<script src="js/consent.js?v=20261117d"></script>
-<script src="js/welcome.js?v=20261117d" defer></script>
-<script src="js/frete.js?v=20261117d" defer></script>
-<script src="js/cart.js?v=20261117d"></script>
+<script src="js/config.js?v=20261117e"></script>
+<script src="js/api.js?v=20261117e"></script>
+<script src="js/consent.js?v=20261117e"></script>
+<script src="js/welcome.js?v=20261117e" defer></script>
+<script src="js/frete.js?v=20261117e" defer></script>
+<script src="js/cart.js?v=20261117e"></script>
+<script src="js/estoque.js?v=20261117e" defer></script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#d6');if(a&&window.KBCart&&a.getAttribute('data-slug')){KBCart.add(a.getAttribute('data-slug'),1)}})</script>
 <script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>

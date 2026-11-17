@@ -82,14 +82,28 @@ O cliente monta o carrinho, preenche os dados em `checkout.html` e paga na pági
 
 Como administrar: **Painel → Pedidos** mostra frete, CPF, forma de pagamento e o número do pagamento no Mercado Pago. Pedidos que o cliente começou e não pagou ficam ocultos (marque "Mostrar abandonados" para ver); eles são cancelados sozinhos quando o cliente tenta de novo e devolvem estoque e cupom. Para cancelar um pedido pago, devolva o dinheiro primeiro no Mercado Pago.
 
+## 10. Produtos esgotados e "Me avise quando voltar"
+Um perfume aparece como **Esgotado** quando o campo **Estoque** (Painel → Produtos) está em **0**. Se o campo estiver vazio, o estoque não é controlado e o perfume nunca esgota. Esgotado, ele ganha o selo, o botão "Comprar" some, aparece "Me avise quando voltar" e o checkout não deixa comprar. Quando você coloca estoque de novo, cada pessoa que pediu aviso recebe **um único e-mail** automaticamente.
+
+1. **Banco:** SQL Editor → cole `supabase/007_esgotados_avise_me.sql` → Run. Se aparecer aviso sobre `pg_net` ou `pg_cron`, ative essas duas em **Database → Extensions** e rode o arquivo de novo.
+2. **Função:** Edge Functions → `smooth-task` → cole `supabase/functions/loja/COPIAR-PARA-O-SUPABASE.txt` → Deploy.
+3. **Serviço de e-mail (Resend):** crie a conta em resend.com → **Domains → Add domain** → `korboly.com.br`. Ele mostra alguns registros de DNS: copie cada um em **Hostinger → Domínios → korboly.com.br → DNS / Nameservers** e depois clique em **Verify** no Resend.
+4. Resend → **API Keys → Create API key** (permissão "Sending access"). No Supabase, crie o segredo `RESEND_API_KEY` com ela.
+5. Opcional: segredo `EMAIL_FROM` para trocar o remetente (padrão: `Korboly <avisos@korboly.com.br>`).
+6. Rode o `enviar.bat`.
+7. **Painel → Avise-me:** mostra quem está esperando cada perfume, os e-mails, o histórico de envios e se o e-mail está configurado. "Excluir" apaga um cadastro quando o cliente pedir.
+
+Enquanto o `RESEND_API_KEY` não existir, os pedidos de aviso ficam guardados e são enviados assim que ele for configurado (automático a cada 15 minutos, ou pelo botão "Enviar avisos pendentes agora").
+
 ## Onde cada coisa fica
 - Site: `index.html` · Conta do cliente: `conta.html` · Painel: `admin/index.html` · FAQ: `faq.html` · Política: `privacidade.html`
 - Calculadora de frete: `js/frete.js` · Carrinho: `js/cart.js` · Checkout: `checkout.html` · Retorno do pagamento: `pedido.html`
-- Servidor da loja (frete + pagamento): `supabase/functions/loja/index.ts`
+- Servidor da loja (frete + pagamento + avisos por e-mail): `supabase/functions/loja/index.ts`
+- Esgotados e "Me avise": `js/estoque.js` · Imagens dos e-mails: `img/email/`
 - Aviso de cookies: `js/consent.js` · Pop-up de primeira compra: `js/welcome.js`
 - Segurança: `supabase/schema.sql` (regras RLS, funções, bloqueio de admin)
 - Variáveis: só em `js/config.js` (URL + chave anon, ambas públicas por desenho). Senhas e chaves secretas **nunca** vão para o GitHub.
 
 ## O que ainda NÃO existe
-- Envio automático de e-mails (confirmação de pedido, código de rastreio, cupom). Hoje o cliente acompanha tudo em "Minha conta".
+- E-mails de confirmação de pedido, de código de rastreio e do cupom (o envio de e-mail já existe, por enquanto só para o aviso de volta ao estoque). Hoje o cliente acompanha o pedido em "Minha conta".
 - Compra da etiqueta de frete pelo painel: a etiqueta é comprada no site do Melhor Envio, e o código de rastreio é colado em Painel → Pedidos.

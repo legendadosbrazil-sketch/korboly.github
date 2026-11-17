@@ -3,11 +3,14 @@
 //   1. Cota o frete no Melhor Envio (calculadora do site)
 //   2. Cria o pedido e o link de pagamento do Mercado Pago (Checkout Pro)
 //   3. Recebe os avisos de pagamento do Mercado Pago e atualiza o pedido
+//   4. Envia o e-mail "voltou ao estoque" para quem pediu aviso
 //
 // Segredos (Supabase > Edge Functions > Secrets):
 //   MELHOR_ENVIO_TOKEN   obrigatório para o frete
 //   MP_ACCESS_TOKEN      obrigatório para o pagamento (Access Token de PRODUÇÃO do Mercado Pago)
 //   MP_WEBHOOK_SECRET    opcional: assinatura secreta dos Webhooks (Suas integrações > Webhooks)
+//   RESEND_API_KEY       obrigatório para os e-mails automáticos (aviso de volta ao estoque)
+//   EMAIL_FROM           opcional: remetente, padrão "Korboly <avisos@korboly.com.br>" (o domínio precisa estar verificado no Resend)
 //   SITE_URL             opcional: padrão https://korboly.com.br
 //   MELHOR_ENVIO_SANDBOX=1 / MELHOR_ENVIO_EMAIL   opcionais
 
@@ -408,6 +411,80 @@ async function webhook(req: Request, env: Env, f: typeof fetch, raw: string): Pr
   }
 }
 
+
+// ---------------------------------------------------------------- aviso de volta ao estoque
+function escHtml(v: unknown): string {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c]);
+}
+
+function restockEmail(site: string, r: any, contact: string) {
+  const name = String(r.name || 'Seu perfume');
+  const link = site + '/?p=' + encodeURIComponent(r.slug) + '&utm_source=email&utm_medium=aviso&utm_campaign=voltou-ao-estoque';
+  let img = String(r.image || '');
+  if (img && !/^https?:\/\//.test(img)) img = site + '/img/email/' + encodeURIComponent(r.slug) + '.jpg';
+  const vol = r.volume_ml ? r.volume_ml + ' ML' : '';
+  const ink = '#1D2C78', paper = '#EFEBE3', sheet = '#F7F4EE', accent = '#A64F27', muted = '#555D8C';
+  const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escHtml(name)} voltou</title></head>
+<body style="margin:0;padding:0;background:${paper};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${escHtml(name)} está disponível de novo na Korboly.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${paper};"><tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${sheet};border:1px solid #D9D3C6;">
+<tr><td align="center" style="padding:28px 24px 20px;border-bottom:1px solid #D9D3C6;font-family:Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:8px;color:${ink};">KORBOLY</td></tr>
+${img ? `<tr><td align="center" style="padding:28px 24px 0;"><a href="${escHtml(link)}"><img src="${escHtml(img)}" width="300" alt="Frasco ${escHtml(name)}" style="display:block;width:100%;max-width:300px;height:auto;border:0;"></a></td></tr>` : ''}
+<tr><td align="center" style="padding:28px 32px 8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:${accent};font-weight:bold;">De volta ao estoque</td></tr>
+<tr><td align="center" style="padding:0 32px;font-family:Georgia,'Times New Roman',serif;font-size:38px;line-height:1.1;color:${ink};font-weight:normal;">${escHtml(name)}</td></tr>
+${vol ? `<tr><td align="center" style="padding:8px 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:2px;color:${muted};">${escHtml(vol)}</td></tr>` : ''}
+<tr><td align="center" style="padding:18px 40px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:${ink};">Você pediu para ser avisado, e ele chegou. O estoque é limitado, então garanta o seu enquanto há unidades.</td></tr>
+<tr><td align="center" style="padding:28px 32px 36px;"><a href="${escHtml(link)}" style="display:inline-block;background:${ink};color:${paper};font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;padding:16px 32px;font-weight:bold;">Ver o perfume</a></td></tr>
+<tr><td style="padding:20px 32px 28px;border-top:1px solid #D9D3C6;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:${muted};">Você recebeu este e-mail porque pediu, no site korboly.com.br, para ser avisado quando ${escHtml(name)} voltasse ao estoque. Este é um aviso único: não vamos enviar outras mensagens por esse cadastro. Saiba como tratamos seus dados na <a href="${site}/privacidade.html" style="color:${muted};">Política de Privacidade</a>${contact ? ` ou fale com a gente em <a href="mailto:${escHtml(contact)}" style="color:${muted};">${escHtml(contact)}</a>` : ''}.</td></tr>
+</table></td></tr></table></body></html>`;
+  const text = `${name} voltou ao estoque na Korboly.\n\nVocê pediu para ser avisado, e ele chegou. O estoque é limitado.\n\nVer o perfume: ${link}\n\nVocê recebeu este e-mail porque pediu, em korboly.com.br, para ser avisado quando ${name} voltasse ao estoque. É um aviso único: não enviaremos outras mensagens por esse cadastro.\nPolítica de Privacidade: ${site}/privacidade.html`;
+  return { subject: `${name} voltou ao estoque`, html, text };
+}
+
+async function restockAuthorized(req: Request, env: Env, f: typeof fetch): Promise<boolean> {
+  const k = req.headers.get('x-korboly-cron') || '';
+  if (k.length >= 32) {
+    try {
+      const [row] = await db(env, f, '_internal?select=value&key=eq.cron_secret');
+      if (row?.value && row.value === k) return true;
+    } catch (e) { console.error(e); }
+  }
+  return await isAdmin(req, env, f);
+}
+
+async function sendRestock(req: Request, env: Env, f: typeof fetch): Promise<Response> {
+  if (!(await restockAuthorized(req, env, f))) throw new HttpError(403, { error: 'Acesso negado.' });
+  if (!env.RESEND_API_KEY) return out(req, 200, { enviados: 0, falhas: 0, aviso: 'Falta o segredo RESEND_API_KEY: os avisos ficam guardados e serão enviados quando ele for configurado.' });
+  const site = (env.SITE_URL || 'https://korboly.com.br').replace(/\/+$/, '');
+  const from = env.EMAIL_FROM || 'Korboly <avisos@korboly.com.br>';
+  let contact = '';
+  try { const c = await db(env, f, 'site_content?select=value&key=eq.contact_email'); contact = String(c?.[0]?.value || '').trim(); } catch { /* */ }
+  let ok = 0, bad = 0, lastErr = '';
+  const started = Date.now();
+  for (let round = 0; round < 4 && Date.now() - started < 40_000; round++) {
+    const batch: any[] = await svcRpc(env, f, '_restock_claim', { p_limit: 25 });
+    if (!batch?.length) break;
+    for (const r of batch) {
+      const m = restockEmail(site, r, contact);
+      let err = '', pid = '';
+      try {
+        const res = await f('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json', 'Idempotency-Key': 'restock-' + r.id },
+          body: JSON.stringify({ from, to: [r.email], subject: m.subject, html: m.html, text: m.text, ...(contact ? { reply_to: contact } : {}) }),
+        });
+        const t = await res.text();
+        if (res.ok) { try { pid = String(JSON.parse(t).id || ''); } catch { /* */ } }
+        else err = 'Resend ' + res.status + ': ' + t.slice(0, 200);
+      } catch (e) { err = 'Falha de rede: ' + String((e as Error)?.message || e).slice(0, 150); }
+      await svcRpc(env, f, '_restock_done', { p_id: r.id, p_ok: !err, p_error: err || null, p_provider: pid || null });
+      if (err) { bad++; lastErr = err; } else ok++;
+    }
+  }
+  return out(req, 200, { enviados: ok, falhas: bad, ...(lastErr ? { ultimo_erro: lastErr } : {}) });
+}
+
 // ---------------------------------------------------------------- entrada
 export async function handle(req: Request, env: Env, f: typeof fetch = fetch): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
@@ -428,6 +505,11 @@ export async function handle(req: Request, env: Env, f: typeof fetch = fetch): P
 
   try {
     if (body.action === 'checkout') return await checkout(req, env, f, body);
+    if (body.action === 'notificar_estoque') return await sendRestock(req, env, f);
+    if (body.action === 'avisos_status') {
+      if (!(await isAdmin(req, env, f))) throw new HttpError(403, { error: 'Só administradores.' });
+      return out(req, 200, { email_configurado: !!env.RESEND_API_KEY, remetente: env.EMAIL_FROM || 'Korboly <avisos@korboly.com.br>' });
+    }
     if (body.action === 'diagnostico') {
       if (!(await isAdmin(req, env, f))) throw new HttpError(403, { error: 'Só administradores.' });
       if (!env.MP_ACCESS_TOKEN) throw new HttpError(503, { error: 'Falta o MP_ACCESS_TOKEN nos segredos da função.' });

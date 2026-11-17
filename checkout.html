@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
-<link rel="stylesheet" href="css/ui.css?v=20261117d">
-<link rel="stylesheet" href="css/site.css?v=20261117d">
+<link rel="stylesheet" href="css/ui.css?v=20261117e">
+<link rel="stylesheet" href="css/site.css?v=20261117e">
 <style>
 header{display:flex;justify-content:space-between;align-items:center;padding:0 clamp(16px,3vw,32px);height:72px;border-bottom:1px solid var(--line)}
 .back{color:var(--muted)}.back:hover{color:var(--ink)}
@@ -67,7 +67,7 @@ h1{font-size:clamp(34px,5vw,48px);margin:0 0 28px;font-weight:300}
 </div></footer>
 <div class="toast" id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=20261117d"></script><script src="js/sb.js?v=20261117d"></script><script src="js/api.js?v=20261117d"></script><script src="js/consent.js?v=20261117d"></script><script src="js/cart.js?v=20261117d"></script>
+<script src="js/config.js?v=20261117e"></script><script src="js/sb.js?v=20261117e"></script><script src="js/api.js?v=20261117e"></script><script src="js/consent.js?v=20261117e"></script><script src="js/cart.js?v=20261117e"></script>
 <script>
 (function(){
 var app=document.getElementById('app'),toastEl=document.getElementById('toast'),tt;
@@ -87,7 +87,7 @@ function img(u){return /^https?:/.test(u||'')?u:(u||'')}
 async function boot(){
  var items=KBCart.items();
  if(!items.length){app.innerHTML='<div class="empty"><h1 class="serif">Seu carrinho está vazio</h1><p>Escolha uma fragrância para continuar.</p><a class="btn solid" href="index.html">Ver fragrâncias</a></div>';return}
- try{var P=await KBAPI.get('products?select=id,slug,name,price_cents,volume_ml,images,available&slug=in.('+items.map(function(i){return i.slug}).join(',')+')');
+ try{var P=await KBAPI.get('products?select=id,slug,name,price_cents,volume_ml,images,available,stock&slug=in.('+items.map(function(i){return i.slug}).join(',')+')');
   P.forEach(function(p){S.products[p.slug]=p});}catch(e){app.innerHTML='<div class="empty"><p>Não foi possível carregar o carrinho. Recarregue a página.</p></div>';return}
  items.forEach(function(i){var p=S.products[i.slug];if(!p||!p.available)KBCart.remove(i.slug)});
  if(!KBCart.items().length)return boot();
@@ -96,12 +96,16 @@ async function boot(){
   S.profile=r[0].data||{};S.addresses=r[1].data||[];if(S.addresses.length)S.addr=S.addresses[0].id}
  render()}
 
-function sub(){return KBCart.items().reduce(function(a,i){var p=S.products[i.slug];return a+(p?p.price_cents*i.qty:0)},0)}
+function outOf(p){return p&&p.stock!==null&&p.stock!==undefined&&p.stock<=0}
+function hasOut(){return KBCart.items().some(function(i){return outOf(S.products[i.slug])})}
+function sub(){return KBCart.items().reduce(function(a,i){var p=S.products[i.slug];return a+(p&&!outOf(p)?p.price_cents*i.qty:0)},0)}
 
 function render(){
  var items=KBCart.items();
  if(!items.length)return boot();
- var cart=items.map(function(i){var p=S.products[i.slug];return '<div class="it"><img src="'+esc(img(p.images&&p.images[0]))+'" alt=""><div><h3>'+esc(p.name)+'</h3><span class="v">'+(p.volume_ml?p.volume_ml+' ml · ':'')+brl(p.price_cents)+'</span><div><span class="qty"><button type="button" data-q="'+i.slug+'" data-d="-1" aria-label="Diminuir quantidade de '+esc(p.name)+'">−</button><span aria-live="polite">'+i.qty+'</span><button type="button" data-q="'+i.slug+'" data-d="1" aria-label="Aumentar quantidade de '+esc(p.name)+'">+</button></span><button type="button" class="rm" data-rm="'+i.slug+'">Remover</button></div></div><div class="pr">'+brl(p.price_cents*i.qty)+'</div></div>'}).join('');
+ var cart=items.map(function(i){var p=S.products[i.slug];if(outOf(p))return '<div class="it" style="opacity:.75"><img src="'+esc(img(p.images&&p.images[0]))+'" alt=""><div><h3>'+esc(p.name)+'</h3><span class="tag err" style="margin-top:6px;display:inline-block">Esgotado</span><div><button type="button" class="rm" style="margin-left:0" data-rm="'+i.slug+'">Remover do carrinho</button> <a class="rm" href="index.html?p='+encodeURIComponent(i.slug)+'">Avise-me quando voltar</a></div></div><div class="pr">—</div></div>';
+  if(p.stock!=null&&i.qty>p.stock){KBCart.set(i.slug,p.stock);i.qty=p.stock}
+  return '<div class="it"><img src="'+esc(img(p.images&&p.images[0]))+'" alt=""><div><h3>'+esc(p.name)+'</h3><span class="v">'+(p.volume_ml?p.volume_ml+' ml · ':'')+brl(p.price_cents)+'</span><div><span class="qty"><button type="button" data-q="'+i.slug+'" data-d="-1" aria-label="Diminuir quantidade de '+esc(p.name)+'">−</button><span aria-live="polite">'+i.qty+'</span><button type="button" data-q="'+i.slug+'" data-d="1"'+(p.stock!=null&&i.qty>=p.stock?' disabled title="Quantidade máxima disponível"':'')+' aria-label="Aumentar quantidade de '+esc(p.name)+'">+</button></span><button type="button" class="rm" data-rm="'+i.slug+'">Remover</button></div></div><div class="pr">'+brl(p.price_cents*i.qty)+'</div></div>'}).join('');
  var left='<div class="sec" style="border-top:0;padding-top:0"><h2><b>1</b>Seu carrinho</h2>'+cart+'</div>';
  if(!S.user){
   left+='<div class="sec"><h2><b>2</b>Identificação</h2><div class="box"><p style="margin:0 0 16px">Para finalizar a compra e acompanhar o pedido, entre na sua conta ou crie uma. Seu carrinho fica guardado.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn solid" href="conta.html?next=checkout.html">Entrar</a><a class="btn" href="conta.html?mode=signup&next=checkout.html">Criar conta</a></div></div></div>';
@@ -141,25 +145,27 @@ function totals(){
  if(d)h+='<div class="ln dc"><span>Cupom '+esc(S.coupon.code)+'</span><span>− '+brl(d)+'</span></div>';
  h+='<div class="ln"><span class="m">Frete'+(sh?' ('+esc(sh.servico+(sh.transportadora&&sh.transportadora.toLowerCase()!==sh.servico.toLowerCase()?' · '+sh.transportadora:''))+')':'')+'</span><span>'+(sh?(sh.preco_centavos?brl(sh.preco_centavos):'Grátis'):'—')+'</span></div>';
  h+='<div class="ln t"><span>Total</span><span>'+brl(s-d+(sh?sh.preco_centavos:0))+'</span></div>';
- $('#tot').innerHTML=h;
- var b=$('#pay');if(b&&S.user)b.disabled=!sh||S.busy}
+ var te=$('#tot');if(!te)return;te.innerHTML=h;
+ var b=$('#pay');if(b&&S.user)b.disabled=!sh||S.busy||hasOut();
+ var pm=$('#paym');if(pm&&hasOut()&&!S.busy){pm.className='msg err';pm.textContent='Há um perfume esgotado no carrinho. Remova-o para continuar.'}}
 
 var qTimer;
 function maybeQuote(now){clearTimeout(qTimer);qTimer=setTimeout(quote,now?0:450)}
 async function quote(){
  var a=curAddr(),box=$('#ship');if(!a||!box)return;
- var key=a.zip+'|'+JSON.stringify(KBCart.items());
+ var items=KBCart.items().filter(function(i){return !outOf(S.products[i.slug])});if(!items.length){box.innerHTML='<p class="muted" style="margin:0">Sem itens disponíveis para calcular o frete.</p>';S.ship=null;totals();return}
+ var key=a.zip+'|'+JSON.stringify(items);
  if(!/^\d{8}$/.test(a.zip)){S.ship=null;S.shipOpts=[];S.shipFor='';box.innerHTML='<p class="muted" style="margin:0">Informe o CEP para ver as opções de entrega.</p>';totals();return}
  if(key===S.shipFor&&S.shipOpts.length){paintShip();return}
  var seq=++S.quoteSeq;box.innerHTML='<p class="muted" style="margin:0">Calculando o frete…</p>';S.ship=null;totals();
- try{var r=await KBAPI.fn(FN,{cep:a.zip,items:KBCart.items()});if(seq!==S.quoteSeq)return;
+ try{var r=await KBAPI.fn(FN,{cep:a.zip,items:items});if(seq!==S.quoteSeq)return;
   S.shipOpts=r.opcoes||[];S.shipFor=key;S.shipDisc=r.desconto_centavos||0;
   if(!S.shipOpts.length){box.innerHTML='<p class="msg err" style="margin:0">'+esc(r.aviso||'Nenhuma opção de entrega para este CEP.')+'</p>';return}
   var keep=S.shipSel&&S.shipOpts.find(function(o){return o.id===S.shipSel});S.ship=keep||S.shipOpts[0];S.shipSel=S.ship.id;paintShip()}
  catch(e){if(seq!==S.quoteSeq)return;S.shipOpts=[];S.shipFor='';box.innerHTML='<p class="msg err" style="margin:0">'+esc(e&&e.status===400&&e.message?e.message:'Não foi possível calcular o frete agora. Tente de novo em instantes.')+'</p>'}
  totals()}
 function paintShip(){
- var box=$('#ship');
+ var box=$('#ship');if(!box)return;
  box.innerHTML=(S.shipDisc?'<p style="margin:0 0 12px;color:var(--accent);font-weight:600;font-size:13px">A Korboly paga '+brl(S.shipDisc)+' do seu frete.</p>':'')+'<div role="radiogroup" aria-label="Opções de entrega">'+S.shipOpts.map(function(o){var on=S.ship&&S.ship.id===o.id;
   return '<label class="opt'+(on?' on':'')+'"><input type="radio" name="sh" value="'+o.id+'"'+(on?' checked':'')+'><span class="s">'+esc(o.servico)+(o.transportadora&&o.transportadora.toLowerCase()!==o.servico.toLowerCase()?' · '+esc(o.transportadora):'')+'</span><span class="p">'+(o.preco_original_centavos>o.preco_centavos?'<s>'+brl(o.preco_original_centavos)+'</s>':'')+(o.preco_centavos?brl(o.preco_centavos):'Grátis')+'</span><span class="d">'+(o.prazo_min===o.prazo_max?'até '+o.prazo_max:o.prazo_min+' a '+o.prazo_max)+' dias úteis após a postagem</span></label>'}).join('')+'</div>';
  totals()}
@@ -200,6 +206,7 @@ async function submit(){
  f.cpf.removeAttribute('aria-invalid');
  if(!/^\d{10,11}$/.test(digits(f.tel.value))){f.tel.focus();return msg(m,'Informe um celular com DDD.')}
  if(!/^\d{8}$/.test(a.zip)||!a.street||!a.number||!a.district||!a.city||!/^[A-Z]{2}$/.test(a.state)){if(S.addr==='new'){var first=['cep','rua','num','bai','cid','uf'].find(function(n){return !f[n].value.trim()});if(first)f[first].focus()}return msg(m,'Complete o endereço: CEP, rua, número, bairro, cidade e UF.')}
+ if(hasOut())return msg(m,'Há um perfume esgotado no carrinho. Remova-o para continuar.');
  if(!S.ship)return msg(m,'Escolha uma opção de entrega.');
  S.busy=true;totals();var b=$('#pay');b.textContent='Gerando pagamento…';
  try{
@@ -209,6 +216,7 @@ async function submit(){
   var d=res.data;
   if(res.error){try{d=res.error.context&&res.error.context.json?await res.error.context.json():null}catch(x){d=null}
    if(d&&res.error.context&&res.error.context.status===409){S.shipFor='';maybeQuote(true)}
+   if(d&&/Estoque insuficiente|indisponível/i.test(d.error||'')){try{var P2=await KBAPI.get('products?select=id,slug,name,price_cents,volume_ml,images,available,stock&slug=in.('+KBCart.items().map(function(i){return i.slug}).join(',')+')');P2.forEach(function(p){S.products[p.slug]=p});keepForm();S.busy=false;render()}catch(x){}}
    throw new Error(d&&d.error?d.error:'Não foi possível iniciar o pagamento. Tente de novo.')}
   if(!d||!d.pagar_em||!/^https:\/\/([a-z0-9-]+\.)*mercadopago\.com(\.br)?\//.test(d.pagar_em))throw new Error('Resposta inesperada do pagamento.');
   try{sessionStorage.setItem('kb_last_order',String(d.pedido))}catch(x){}

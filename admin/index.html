@@ -12,7 +12,7 @@
 <link rel="manifest" href="../site.webmanifest">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter+Tight:wght@500;600&display=swap">
-<link rel="stylesheet" href="../css/ui.css?v=20261117d">
+<link rel="stylesheet" href="../css/ui.css?v=20261117e">
 <style>
 body{min-height:100vh}
 .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
@@ -57,7 +57,7 @@ h1.serif{font-size:36px;margin:0 0 28px}
 <div class="toast" id="toast" role="status"></div>
 <div class="grain"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script src="../js/config.js?v=20261117d"></script><script src="../js/sb.js?v=20261117d"></script><script src="../js/md.js?v=20261117d"></script>
+<script src="../js/config.js?v=20261117e"></script><script src="../js/sb.js?v=20261117e"></script><script src="../js/md.js?v=20261117e"></script>
 <script>
 (function(){
 var root=document.getElementById('root'),modal=document.getElementById('modal'),mbox=document.getElementById('mbox'),toastEl=document.getElementById('toast'),tt;
@@ -74,11 +74,11 @@ function err(e,m){console.error(e);toast(m||'Não foi possível concluir a açã
 
 if(!window.KB_READY||!window.sb){denied('Em configuração','Preencha <code>js/config.js</code> com os dados do Supabase.');return}
 
-var ic={frete:'<svg viewBox="0 0 16 16"><path d="M1.5 4.5h8v7h-8zM9.5 7h3l2 2.5v2h-5"/><circle cx="4.5" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/></svg>',dash:'<svg viewBox="0 0 16 16"><rect x="1.5" y="1.5" width="5" height="6"/><rect x="9.5" y="1.5" width="5" height="3.5"/><rect x="9.5" y="8" width="5" height="6.5"/><rect x="1.5" y="10.5" width="5" height="4"/></svg>',
+var ic={aviso:'<svg viewBox="0 0 16 16"><path d="M8 2.2a3.8 3.8 0 00-3.8 3.8v2.6L2.8 11h10.4l-1.4-2.4V6A3.8 3.8 0 008 2.2z"/><path d="M6.6 13a1.5 1.5 0 002.8 0"/></svg>',frete:'<svg viewBox="0 0 16 16"><path d="M1.5 4.5h8v7h-8zM9.5 7h3l2 2.5v2h-5"/><circle cx="4.5" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/></svg>',dash:'<svg viewBox="0 0 16 16"><rect x="1.5" y="1.5" width="5" height="6"/><rect x="9.5" y="1.5" width="5" height="3.5"/><rect x="9.5" y="8" width="5" height="6.5"/><rect x="1.5" y="10.5" width="5" height="4"/></svg>',
  prod:'<svg viewBox="0 0 16 16"><path d="M5 1.5h6v3H5zM3.5 4.5h9v10h-9z"/></svg>',ped:'<svg viewBox="0 0 16 16"><path d="M1.5 3h2l1.5 8h7.5l1.5-6H4.2"/><circle cx="6" cy="13.5" r="1"/><circle cx="11.5" cy="13.5" r="1"/></svg>',
  cli:'<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14.5c.5-3 3-4.5 6-4.5s5.500 1.500 6 4.500"/></svg>',con:'<svg viewBox="0 0 16 16"><path d="M2 3h12M2 7h12M2 11h8"/></svg>',
  mkt:'<svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="10"/><path d="M1.5 3.5L8 9l6.5-5.5"/></svg>',faq:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.6"/><circle cx="8" cy="11.6" r=".3"/></svg>',priv:'<svg viewBox="0 0 16 16"><path d="M8 1.5l5.5 2v4.200c0 3.300-2.300 5.800-5.500 6.800C4.800 13.500 2.500 11 2.500 7.700V3.500z"/><path d="M5.800 8l1.600 1.600L10.400 6.500"/></svg>'};
-var TABS=[['dash','Dashboard'],['prod','Produtos'],['frete','Frete'],['ped','Pedidos'],['cli','Clientes'],['mkt','Marketing'],['faq','FAQ'],['priv','Privacidade'],['con','Conteúdo']];
+var TABS=[['dash','Dashboard'],['prod','Produtos'],['frete','Frete'],['aviso','Avise-me'],['ped','Pedidos'],['cli','Clientes'],['mkt','Marketing'],['faq','FAQ'],['priv','Privacidade'],['con','Conteúdo']];
 var cur='dash',me=null;
 
 function layout(){
@@ -88,7 +88,7 @@ function layout(){
  $('#nav').onclick=function(e){var b=e.target.closest('button');if(b){cur=b.dataset.t;go();$('#sb').classList.remove('on')}};
  $('#mb').onclick=function(){$('#sb').classList.toggle('on')};go()}
 function go(){[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.dataset.t===cur)});
- var c=$('#cont');c.innerHTML='<p class="muted">Carregando…</p>';({dash:vDash,frete:vFrete,prod:vProd,ped:vPed,cli:vCli,mkt:vMkt,faq:vFaq,priv:vPrivA,con:vCon})[cur](c).catch(function(e){err(e,'Erro ao carregar.');c.innerHTML='<p class="msg err">Não foi possível carregar esta seção.</p>'})}
+ var c=$('#cont');c.innerHTML='<p class="muted">Carregando…</p>';({dash:vDash,frete:vFrete,aviso:vAviso,prod:vProd,ped:vPed,cli:vCli,mkt:vMkt,faq:vFaq,priv:vPrivA,con:vCon})[cur](c).catch(function(e){err(e,'Erro ao carregar.');c.innerHTML='<p class="msg err">Não foi possível carregar esta seção.</p>'})}
 
 /* ---------- Dashboard ---------- */
 async function vDash(c){
@@ -113,7 +113,7 @@ async function vProd(c){
  var r=await Promise.all([sb.from('products').select('*').order('position').order('created_at'),sb.from('categories').select('*').order('position')]);
  if(r[0].error)throw r[0].error;var P=r[0].data,C=r[1].data||[];if(P.length)SHIPCOLS='ship_weight_g' in P[0];
  c.innerHTML='<h1 class="serif">Produtos</h1><div class="tools"><button class="btn solid sm" id="np">Novo perfume</button><button class="btn sm" id="cats">Categorias</button></div><div class="panel"><table><thead><tr><th></th><th>Produto</th><th>Preço</th><th>Estoque</th><th>Status</th><th></th></tr></thead><tbody>'+
- (P.length?P.map(function(p){return '<tr><td>'+(p.images[0]?'<img class="pimg" src="'+esc(imgUrl(p.images[0]))+'" alt="">':'')+'</td><td><b>'+esc(p.name)+'</b><br><span class="muted" style="font-size:12px">'+(p.volume_ml?p.volume_ml+' ML':'')+(p.featured?' · destaque':'')+'</span></td><td>'+brl(p.price_cents)+'</td><td>'+(p.stock==null?'<span class="muted">não controlado</span>':p.stock)+'</td><td><span class="tag '+(p.available?'ok':'err')+'">'+(p.available?'Disponível':'Indisponível')+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-e="'+p.id+'">Editar</button> <button class="btn sm danger" data-d="'+p.id+'">Excluir</button></td></tr>'}).join(''):'<tr><td colspan="6" class="muted">Nenhum produto.</td></tr>')+'</tbody></table></div>';
+ (P.length?P.map(function(p){return '<tr><td>'+(p.images[0]?'<img class="pimg" src="'+esc(imgUrl(p.images[0]))+'" alt="">':'')+'</td><td><b>'+esc(p.name)+'</b><br><span class="muted" style="font-size:12px">'+(p.volume_ml?p.volume_ml+' ML':'')+(p.featured?' · destaque':'')+'</span></td><td>'+brl(p.price_cents)+'</td><td>'+(p.stock==null?'<span class="muted">não controlado</span>':p.stock)+'</td><td><span class="tag '+(p.available&&!(p.stock!=null&&p.stock<=0)?'ok':'err')+'">'+(!p.available?'Indisponível':(p.stock!=null&&p.stock<=0?'Esgotado':'Disponível'))+'</span></td><td style="white-space:nowrap"><button class="btn sm" data-e="'+p.id+'">Editar</button> <button class="btn sm danger" data-d="'+p.id+'">Excluir</button></td></tr>'}).join(''):'<tr><td colspan="6" class="muted">Nenhum produto.</td></tr>')+'</tbody></table></div>';
  $('#np').onclick=function(){fProd(null,C)};$('#cats').onclick=function(){fCats(C)};
  c.onclick=async function(e){var b=e.target.closest('button');if(!b)return;
   if(b.dataset.e)fProd(P.find(function(x){return x.id===b.dataset.e}),C);
@@ -128,6 +128,7 @@ function fProd(p,C){p=p||{};var imgs=(p.images||[]).slice();
  '<div class="row3"><label class="fld"><span class="lbl">Preço (R$)</span><input name="price" inputmode="decimal" value="'+(p.price_cents!=null?real(p.price_cents):'')+'" required></label>'+
  '<label class="fld"><span class="lbl">Volume (ML)</span><input name="vol" inputmode="numeric" value="'+(p.volume_ml||'')+'"></label>'+
  '<label class="fld"><span class="lbl">Estoque</span><input name="stock" inputmode="numeric" placeholder="vazio = não controlar" value="'+(p.stock==null?'':p.stock)+'"></label></div>'+
+ '<p class="muted" style="font-size:12.5px;margin:-6px 0 14px">Com estoque 0 o perfume aparece como <b>Esgotado</b> e mostra o botão "Me avise quando voltar". Ao colocar estoque de novo, quem pediu aviso recebe um e-mail automaticamente.</p>'+
  shipF+'<label class="fld"><span class="lbl">Categoria</span><select name="cat"><option value="">—</option>'+C.map(function(x){return '<option value="'+x.id+'"'+(x.id===p.category_id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label>'+
  '<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px"><label class="switch"><input type="checkbox" name="av"'+(p.available!==false?' checked':'')+'><span class="lbl">Disponível para venda</span></label><label class="switch"><input type="checkbox" name="ft"'+(p.featured?' checked':'')+'><span class="lbl">Destaque</span></label></div>'+
  '<span class="lbl muted">Imagens</span><div class="thumbs" id="th"></div><input type="file" id="up" accept="image/jpeg,image/png,image/webp" multiple style="margin-bottom:18px">'+
@@ -286,6 +287,38 @@ async function vFrete(c){
   $('#str').innerHTML=(dc?'<p class="muted" style="font-size:13px;margin:0 0 10px">Desconto da loja: '+brl(dc)+' por envio. "Você paga" é o que sai do seu bolso em cada pedido.</p>':'')+
    '<table><thead><tr><th>Código</th><th>Serviço</th><th>Transportadora</th>'+(dc?'<th>Frete real</th><th>Cliente paga</th><th>Você paga</th>':'<th>Preço</th>')+'<th>Prazo</th></tr></thead><tbody>'+ops.map(function(o){var orig=o.preco_original_centavos||o.preco_centavos;
    return '<tr><td>'+o.id+'</td><td>'+esc(o.servico)+'</td><td>'+esc(o.transportadora)+'</td>'+(dc?'<td>'+brl(orig)+'</td><td><b>'+(o.preco_centavos?brl(o.preco_centavos):'Grátis')+'</b></td><td>'+brl(orig-o.preco_centavos)+'</td>':'<td>'+brl(o.preco_centavos)+'</td>')+'<td>'+o.prazo_min+(o.prazo_max!==o.prazo_min?' a '+o.prazo_max:'')+' dias úteis</td></tr>'}).join('')+'</tbody></table>'}}
+
+/* ---------- Avise-me (volta ao estoque) ---------- */
+async function vAviso(c){
+ var FNN=(window.KORBOLY&&(window.KORBOLY.LOJA_FUNCTION||window.KORBOLY.FRETE_FUNCTION))||'loja';
+ var r=await sb.rpc('admin_restock_overview');
+ if(r.error){c.innerHTML='<h1 class="serif">Avise-me</h1><div class="panel"><p>Para ativar esta seção, rode o arquivo <b>supabase/007_esgotados_avise_me.sql</b> no SQL Editor do Supabase.</p></div>';return}
+ var O=r.data||[],wait=O.reduce(function(a,x){return a+Number(x.aguardando)},0),sent=O.reduce(function(a,x){return a+Number(x.avisados)},0);
+ c.innerHTML='<h1 class="serif">Avise-me</h1><p class="muted" style="margin:-6px 0 22px">Clientes que pediram aviso de volta ao estoque. Quando você coloca estoque num perfume esgotado (em Produtos), cada pessoa recebe um único e-mail automaticamente.</p>'+
+ '<div class="stats"><div class="stat"><span class="lbl muted">Aguardando aviso</span><div class="v">'+wait+'</div></div><div class="stat"><span class="lbl muted">Já avisados</span><div class="v">'+sent+'</div></div><div class="stat"><span class="lbl muted">Envio de e-mail</span><div class="v" id="emst" style="font-size:18px;margin-top:16px">…</div></div></div>'+
+ '<div class="panel sec"><h3 class="lbl muted">Por perfume</h3><table><thead><tr><th>Perfume</th><th>Estoque</th><th>Aguardando</th><th>Avisados</th><th>Último aviso</th><th></th></tr></thead><tbody>'+
+ O.map(function(p){var out=p.stock!=null&&p.stock<=0;return '<tr><td><b>'+esc(p.name)+'</b></td><td>'+(p.stock==null?'<span class="muted">não controlado</span>':p.stock)+' '+(!p.available?'<span class="tag err">Indisponível</span>':(out?'<span class="tag err">Esgotado</span>':'<span class="tag ok">Disponível</span>'))+'</td><td><b>'+p.aguardando+'</b>'+(Number(p.falhas)?' <span class="tag err" title="Tentativas de envio com erro">'+p.falhas+' com erro</span>':'')+'</td><td>'+p.avisados+'</td><td>'+(p.ultimo_aviso?dt(p.ultimo_aviso):'—')+'</td><td><button class="btn sm" data-ver="'+p.product_id+'">Ver e-mails</button></td></tr>'}).join('')+'</tbody></table>'+
+ '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px"><button class="btn solid" id="snd">Enviar avisos pendentes agora</button><span class="muted" style="font-size:13px">Normalmente não precisa: o envio é automático. Use se algum envio falhou.</span></div><p class="msg" id="sndm" style="margin-top:12px"></p></div>'+
+ '<div class="panel sec"><h3 class="lbl muted">E-mails cadastrados</h3><div class="tools"><input id="aq" placeholder="Buscar e-mail"><select id="ap"><option value="">Todos os perfumes</option>'+O.map(function(p){return '<option value="'+p.product_id+'">'+esc(p.name)+'</option>'}).join('')+'</select><select id="as"><option value="pend">Aguardando</option><option value="ok">Já avisados</option><option value="">Todos</option></select></div><div id="al"></div></div>'+
+ '<div class="panel sec"><h3 class="lbl muted">Histórico de envios</h3><div id="ah"></div></div>';
+ var names={};O.forEach(function(p){names[p.product_id]=p.name});
+ sb.functions.invoke(FNN,{body:{action:'avisos_status'}}).then(function(x){var d=x.data;if(!$('#emst'))return;$('#emst').innerHTML=d&&d.email_configurado?'<span class="tag ok">Configurado</span>':'<span class="tag err">Falta configurar</span>';
+  if(d&&!d.email_configurado)$('#emst').title='Crie o segredo RESEND_API_KEY no Supabase. Os pedidos de aviso ficam guardados até lá.'}).catch(function(){if($('#emst'))$('#emst').textContent='?'});
+ async function list(){var q=$('#aq').value.trim().replace(/[%,()*]/g,''),qb=sb.from('restock_requests').select('*').order('created_at',{ascending:false}).limit(300);
+  if($('#ap').value)qb=qb.eq('product_id',$('#ap').value);if($('#as').value==='pend')qb=qb.is('notified_at',null);if($('#as').value==='ok')qb=qb.not('notified_at','is',null);if(q)qb=qb.ilike('email','%'+q+'%');
+  var x=await qb;if(x.error)return err(x.error);var L=x.data;
+  $('#al').innerHTML=L.length?'<table><thead><tr><th>E-mail</th><th>Perfume</th><th>Cadastro</th><th>Situação</th><th></th></tr></thead><tbody>'+L.map(function(a){return '<tr><td>'+esc(a.email)+'</td><td>'+esc(names[a.product_id]||'—')+'</td><td>'+dt(a.created_at)+'</td><td>'+(a.notified_at?'<span class="tag ok">Avisado em '+dt(a.notified_at)+'</span>':(a.attempts?'<span class="tag err" title="'+esc(a.last_error||'')+'">Erro no envio ('+a.attempts+'x)</span>':'<span class="tag">Aguardando</span>'))+'</td><td><button class="btn sm danger" data-del="'+a.id+'" title="Apaga o cadastro (pedido de exclusão do titular)">Excluir</button></td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum cadastro.</p>';
+  $('#al').onclick=async function(e){var b=e.target.closest('[data-del]');if(!b||!confirm('Excluir este cadastro de aviso? Use quando o cliente pedir a exclusão dos dados.'))return;var d=await sb.from('restock_requests').delete().eq('id',b.dataset.del);if(d.error)return err(d.error);toast('Cadastro excluído.');list()}}
+ async function hist(){var x=await sb.from('restock_notifications').select('*').order('created_at',{ascending:false}).limit(100);if(x.error)return err(x.error);var H=x.data;
+  $('#ah').innerHTML=H.length?'<table><thead><tr><th>Data</th><th>Perfume</th><th>E-mail</th><th>Resultado</th></tr></thead><tbody>'+H.map(function(h){return '<tr><td>'+new Date(h.created_at).toLocaleString('pt-BR')+'</td><td>'+esc(h.product_name||'—')+'</td><td>'+esc(h.email||'—')+'</td><td>'+(h.status==='enviado'?'<span class="tag ok">Enviado</span>':'<span class="tag err" title="'+esc(h.error||'')+'">Falhou</span><br><span class="muted" style="font-size:12px">'+esc((h.error||'').slice(0,90))+'</span>')+'</td></tr>'}).join('')+'</tbody></table>':'<p class="muted">Nenhum aviso enviado ainda.</p>'}
+ var t;$('#aq').oninput=function(){clearTimeout(t);t=setTimeout(list,350)};$('#ap').onchange=list;$('#as').onchange=list;
+ c.querySelector('tbody').onclick=function(e){var b=e.target.closest('[data-ver]');if(!b)return;$('#ap').value=b.dataset.ver;$('#as').value='';list();$('#al').scrollIntoView({behavior:'smooth',block:'start'})};
+ $('#snd').onclick=async function(){var m=$('#sndm'),b=this;b.disabled=true;msg(m,'Enviando…',true);
+  var x=await sb.functions.invoke(FNN,{body:{action:'notificar_estoque'}}),d=x.data;b.disabled=false;
+  if(x.error){try{d=x.error.context&&x.error.context.json?await x.error.context.json():null}catch(y){d=null}return msg(m,d&&d.error?d.error:'A função não respondeu. Confira se o código novo foi publicado.')}
+  if(d.aviso)return msg(m,d.aviso);
+  msg(m,d.enviados+' aviso(s) enviado(s)'+(d.falhas?', '+d.falhas+' com erro: '+(d.ultimo_erro||''):'.')+(d.enviados||d.falhas?'':' Nada pendente para perfumes com estoque.'),!d.falhas);list();hist()};
+ list();hist()}
 
 /* ---------- Marketing: pop-up, contatos e cupons ---------- */
 var ORIG={popup_boas_vindas:'Pop-up',minha_conta:'Minha conta'};
