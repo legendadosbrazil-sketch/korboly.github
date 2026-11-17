@@ -3,5 +3,7 @@
 // NUNCA coloque aqui a "service_role key".
 window.KORBOLY = {
   SUPABASE_URL: "https://brcepymlgicqgyiapxdj.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_RGj67nMLRfApxKR6Yx8Leg_08OB7Igg"
+  SUPABASE_ANON_KEY: "sb_publishable_RGj67nMLRfApxKR6Yx8Leg_08OB7Igg",
+  // Nome da função de frete no Supabase (Edge Functions). Se criar outra com outro nome, troque aqui.
+  FRETE_FUNCTION: "smooth-task"
 };

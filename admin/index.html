@@ -255,9 +255,9 @@ async function vFrete(c){
  $('#stf').onsubmit=async function(e){e.preventDefault();var f=e.target,m=$('#stm'),cep=f.cep.value.replace(/\D/g,'');$('#str').innerHTML='';
   if(!/^\d{8}$/.test(cep))return msg(m,'Digite um CEP de destino com 8 números.');
   msg(m,'Calculando…',true);
-  var res=await sb.functions.invoke('frete',{body:{cep:cep,items:[{slug:f.p.value,qty:1}],teste:true}}),d=res.data;
+  var res=await sb.functions.invoke((window.KORBOLY&&window.KORBOLY.FRETE_FUNCTION)||'frete',{body:{cep:cep,items:[{slug:f.p.value,qty:1}],teste:true}}),d=res.data;
   if(res.error){var ctx=res.error.context;try{d=ctx&&ctx.json?await ctx.json():null}catch(x){d=null}
-   if(!d)return msg(m,'A função "frete" não respondeu. Confira se ela foi publicada no Supabase com o nome frete e com "Verify JWT" desligado.');
+   if(!d)return msg(m,'A função de frete não respondeu. Confira em Supabase › Edge Functions se ela está publicada com o nome '+((window.KORBOLY&&window.KORBOLY.FRETE_FUNCTION)||'frete')+' (o mesmo de js/config.js) e com "Verify JWT" desligado.');
    return msg(m,(d.error||'Erro.')+(d.detalhe?' '+d.detalhe:''))}
   var ops=(d&&d.opcoes)||[];if(!ops.length)return msg(m,(d&&d.aviso)||'Nenhuma opção para este CEP.');
   msg(m,'Funcionando. '+ops.length+' opções encontradas'+(S.ship_enabled?'.':' (o site ainda não mostra a calculadora: ligue-a acima).'),true);
