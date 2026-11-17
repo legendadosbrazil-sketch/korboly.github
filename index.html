@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Korboly – Perfumaria contemporânea</title>
-<meta name="description" content="Korboly: Dark Luxury, Évora e Haitz. Frete grátis para todo o Brasil.">
+<meta name="description" content="Korboly: Dark Luxury, Évora e Haitz. Envio para todo o Brasil.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Korboly – Perfumaria contemporânea">
-<meta property="og:description" content="Dark Luxury, Évora e Haitz. Frete grátis para todo o Brasil.">
+<meta property="og:description" content="Dark Luxury, Évora e Haitz. Envio para todo o Brasil.">
 <meta property="og:image" content="https://legendadosbrazil-sketch.github.io/korboly.github/img/banner.webp">
 <meta property="og:url" content="https://legendadosbrazil-sketch.github.io/korboly.github/">
 <meta name="twitter:card" content="summary_large_image">
@@ -320,7 +320,7 @@ a.onfinish=function(){x.remove()};
 }
 function setActive(i,dir){
 active=i;var f=FILMS[i];
-swap($('c1'),f.name,dir);swap($('c2'),f.vol+' / '+f.price,dir);swap($('c3'),'Frete grátis para todo o Brasil',dir);
+swap($('c1'),f.name,dir);swap($('c2'),f.vol+' / '+f.price,dir);swap($('c3'),window.KBSHIP||'Envio para todo o Brasil',dir);
 tabEls.forEach(function(t,k){t.classList.toggle('on',k===i)});placeInd();
 }
 function goTo(i){
@@ -463,7 +463,7 @@ measure();
 document.fonts&&document.fonts.ready.then(measure);
 setActive(active,1);
 $('c1').innerHTML='';$('c2').innerHTML='';$('c3').innerHTML='';
-(function(){var f=FILMS[active];[['c1',f.name],['c2',f.vol+' / '+f.price],['c3','Frete grátis para todo o Brasil']].forEach(function(p){var sp=document.createElement('span');sp.textContent=p[1];$(p[0]).innerHTML='';$(p[0]).appendChild(sp)})})();
+(function(){var f=FILMS[active];[['c1',f.name],['c2',f.vol+' / '+f.price],['c3',window.KBSHIP||'Envio para todo o Brasil']].forEach(function(p){var sp=document.createElement('span');sp.textContent=p[1];$(p[0]).innerHTML='';$(p[0]).appendChild(sp)})})();
 requestAnimationFrame(frame);
 })();
 </script>
@@ -471,5 +471,6 @@ requestAnimationFrame(frame);
 <script src="js/api.js"></script>
 <script src="js/consent.js"></script>
 <script src="js/welcome.js" defer></script>
+<script>addEventListener('DOMContentLoaded',function(){if(!window.KBAPI||!KBAPI.ok)return;KBAPI.get('site_content?select=value&key=eq.shipping_note').then(function(r){var v=r&&r[0]&&String(r[0].value||'').trim();if(v&&v.length<=80){window.KBSHIP=v;var c=document.getElementById('c3');if(c){c.innerHTML='';var sp=document.createElement('span');sp.textContent=v;c.appendChild(sp)}}}).catch(function(){})});</script>
 </body>
 </html>

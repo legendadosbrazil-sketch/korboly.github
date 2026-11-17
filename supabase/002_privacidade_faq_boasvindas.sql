@@ -560,8 +560,8 @@ begin
   (c2, 3, false, 'Quais formas de pagamento são aceitas?',
    '[Informe as formas de pagamento aceitas, por exemplo Pix e cartão de crédito, e as condições de parcelamento.]'),
 
-  (c3, 1, true, 'O frete é grátis?',
-   'Sim. O frete é grátis para todo o Brasil.'),
+  (c3, 1, true, 'Quem paga o frete?',
+   'O frete é pago pelo comprador. O valor depende do CEP de entrega e é mostrado antes de você finalizar a compra.'),
   (c3, 2, true, 'Como acompanho meu pedido?',
    'Assim que o pedido é enviado, o código de rastreamento aparece em [Minha conta](conta.html) › Meus pedidos.'),
   (c3, 3, false, 'Qual é o prazo de entrega?',
